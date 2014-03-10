@@ -32,6 +32,12 @@
     (assoc (:elements grid) coord value)
     (:defaultval grid)))
 
+(defn print-grid-row [grid row]
+  (println (map #(get-cell grid %1 row) (range 0 (:width grid)))))
+
+(defn print-grid [grid]
+  (dorun (map #(print-grid-row grid %1) (range 0 (:height grid)))))
+
 ; graph routines
 
 (defn graph [& items]
