@@ -25,4 +25,14 @@
                       (put-cell (make-coord 1 1) 3)
                       (get-cell (make-coord 1 1)))))))
 
+(deftest test-coords-in-rect
+  (testing "checks coords in rectangle"
+           (is (= (list (make-coord 3 3))
+                  (coords-in-rect 3 3 1 1)))
+           (is (= (list (make-coord 4 4)
+                        (make-coord 5 4)
+                        (make-coord 4 5)
+                        (make-coord 5 5))
+                  (coords-in-rect 4 4 2 2)))))
+
 (run-tests)

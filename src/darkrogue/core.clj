@@ -32,11 +32,22 @@
     (assoc (:elements grid) coord value)
     (:defaultval grid)))
 
+(defn fill-rect [grid x y width height val]
+ (reduce #(put-cell %1 %2 val) grid (coords-in-rect x y width height)))
+
 (defn print-grid-row [grid row]
   (println (map #(get-cell grid %1 row) (range 0 (:width grid)))))
 
 (defn print-grid [grid]
   (dorun (map #(print-grid-row grid %1) (range 0 (:height grid)))))
+
+; misc utilities
+
+(defn coords-in-rect [x y width height]
+  (for [y (range y (+ height y))
+        x (range x (+ width x))]
+    (make-coord x y)))
+
 
 ; graph routines
 
