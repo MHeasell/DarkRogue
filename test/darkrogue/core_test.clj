@@ -18,8 +18,11 @@
            (is (true?
                  (connected? (add-edge (graph :a :b) :a :b) :a :b)))))
 
-(deftest test-grid
-  (testing "checks that grid get/set works"
-           (is (= 0 (get-cell (make-grid 2 2 0) 0 0)))))
+(deftest test-grid-get-put
+  (testing "checks that grid get/put works"
+           (is (= 0 (get-cell (make-grid 2 2 0) 0 0)))
+           (is (= 3 (-> (make-grid 2 2 0)
+                      (put-cell (make-coord 1 1) 3)
+                      (get-cell (make-coord 1 1)))))))
 
 (run-tests)

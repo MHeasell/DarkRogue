@@ -9,6 +9,9 @@
 
 (defrecord Grid [width height elements defaultval])
 
+(defn make-coord [x y]
+  (Coordinate. x y))
+
 (defn make-grid [width height value]
   "Creates a grid of the given width and height, filled with the given value."
   (Grid. width height {} value))
@@ -22,6 +25,12 @@
   ([grid x y]
     (get-cell grid (Coordinate. x y))))
 
+(defn put-cell [grid coord value]
+  (Grid.
+    (:width grid)
+    (:height grid)
+    (assoc (:elements grid) coord value)
+    (:defaultval grid)))
 
 ; graph routines
 
