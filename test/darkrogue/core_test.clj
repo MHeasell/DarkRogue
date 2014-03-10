@@ -18,6 +18,15 @@
            (is (true?
                  (connected? (add-edge (graph :a :b) :a :b) :a :b)))))
 
+(deftest test-connected-to-any
+  (testing "checks that connected-to-any predicate works"
+           (is (false?
+                 (connected-to-any? (graph :a) :a)))
+           (is (true?
+                 (-> (graph :a :b)
+                   (add-edge :a :b)
+                   (connected-to-any? :a))))))
+
 (deftest test-grid-get-put
   (testing "checks that grid get/put works"
            (is (= 0 (get-cell (make-grid 2 2 0) 0 0)))

@@ -74,6 +74,8 @@
 (defn connected? [graph n1 n2]
   (contains? (n1 graph) n2))
 
+(defn connected-to-any? [graph node]
+  (boolean (seq (node graph))))
 
 (defn main [screen-type]
   (let [screen (s/get-screen screen-type)]
