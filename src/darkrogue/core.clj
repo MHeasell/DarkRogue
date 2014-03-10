@@ -3,14 +3,22 @@
 (require '[lanterna.screen :as s])
 
 
-; world  data
+; Coordinate stuff
 
 (defrecord Coordinate [x y])
 
-(defrecord Grid [width height elements defaultval])
-
 (defn make-coord [x y]
   (Coordinate. x y))
+
+(defn coords-in-rect [x y width height]
+  (for [y (range y (+ height y))
+        x (range x (+ width x))]
+    (make-coord x y)))
+
+
+; Grid stuff
+
+(defrecord Grid [width height elements defaultval])
 
 (defn make-grid [width height value]
   "Creates a grid of the given width and height, filled with the given value."
@@ -41,26 +49,37 @@
 (defn print-grid [grid]
   (dorun (map #(print-grid-row grid %1) (range 0 (:height grid)))))
 
+
 ; misc utilities
 
-(defn coords-in-rect [x y width height]
-  (for [y (range y (+ height y))
-        x (range x (+ width x))]
-    (make-coord x y)))
+(defn neighbours-in-grid [grid coord]
+  (filter #(and (>= (:x coord) 0)
+                (>= (:y coord) 0)
+                (< (:x coord) (:width grid))
+                (< (:y coord) (:height grid)))))
+
+(defn neighbours [coord]
+  (list (make-coord (- (:x coord) 1) (:y coord))
+        (make-coord (+ (:x coord) 1) (:y coord))
+        (make-coord (:x coord) (- (:y coord) 1))
+        (make-coord (:x coord) (+ (:y coord) 1))))
 
 
 ; graph routines
 
-(defn graph [& items]
-  (make-graph items))
+(def empty-graph {})
+
+(defn add-node [graph val]
+  (assoc graph val #{}))
 
 (defn make-graph [coll]
   (reduce add-node empty-graph coll))
 
-(def empty-graph {})
+(defn graph [& items]
+  (make-graph items))
 
 (defn add-directed-edge [graph n1 n2]
-  (let [n1-neighbours (n1 graph)]
+  (let [n1-neighbours (get graph n1)]
     (assoc graph n1 (conj n1-neighbours n2))))
 
 (defn add-edge [graph n1 n2]
@@ -68,14 +87,28 @@
     (add-directed-edge n1 n2)
     (add-directed-edge n2 n1)))
 
-(defn add-node [graph val]
-  (assoc graph val #{}))
-
 (defn connected? [graph n1 n2]
   (contains? (n1 graph) n2))
 
 (defn connected-to-any? [graph node]
-  (boolean (seq (node graph))))
+  (boolean (seq (get graph node))))
+
+(defn nodes [graph]
+  (keys graph))
+
+
+; world generation
+
+(defn connect-nodes-from [graph node]
+  (let [node-set (set (nodes graph))
+        bros (filter #(contains? node-set %1) (neighbours node))
+        unconnected-bros (remove #(connected-to-any? graph %1) bros)]
+    (if (seq unconnected-bros)
+      (let [candidate (rand-nth unconnected-bros)]
+        (connect-nodes-from
+          (add-edge graph node candidate)
+          candidate))
+      graph)))
 
 
 ; main screen displaying stuff

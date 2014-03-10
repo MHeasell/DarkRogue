@@ -44,4 +44,12 @@
                         (make-coord 5 5))
                   (coords-in-rect 4 4 2 2)))))
 
+(deftest test-neighbours
+  (testing "neighbours"
+           (is (= (list (make-coord 1 3)
+                        (make-coord 3 3)
+                        (make-coord 2 2)
+                        (make-coord 2 4))
+                  (neighbours (make-coord 2 3))))))
+
 (run-tests)
