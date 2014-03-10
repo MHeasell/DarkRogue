@@ -77,6 +77,9 @@
 (defn connected-to-any? [graph node]
   (boolean (seq (node graph))))
 
+
+; main screen displaying stuff
+
 (defn main [screen-type]
   (let [screen (s/get-screen screen-type)]
     (s/in-screen screen
