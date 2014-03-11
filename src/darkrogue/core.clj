@@ -47,13 +47,16 @@
 (defn fill-rect [grid x y width height val]
  (reduce #(put-cell %1 %2 val) grid (coords-in-rect x y width height)))
 
-(defn fill-rect-extents [grid center-x center-y extent-x extent-y val]
-  (fill-rect grid
-             (- center-x extent-x)
-             (- center-y extent-y)
-             (+ (* extent-x 2) 1)
-             (+ (* extent-y 2) 1)
-             val))
+(defn fill-rect-extents
+  ([grid coords extent-x extent-y val]
+    (fill-rect-extents grid (:x coords) (:y coords) extent-x extent-y val))
+  ([grid center-x center-y extent-x extent-y val]
+    (fill-rect grid
+               (- center-x extent-x)
+               (- center-y extent-y)
+               (+ (* extent-x 2) 1)
+               (+ (* extent-y 2) 1)
+               val)))
 
 (defn print-grid-row [grid row]
   (println (map #(get-cell grid %1 row) (range 0 (:width grid)))))
@@ -68,12 +71,34 @@
     (fmap f (:elements grid))
     (f (:defaultval grid))))
 
+(defn get-line-coords [x1 y1 x2 y2]
+  (let [minx (min x1 x2)
+        miny (min y1 y2)
+        maxx (max x1 x2)
+        maxy (max y1 y2)
+        horiz-coords (map #(make-coord % y1) (range minx (+ maxx 1)))
+        vert-coords (map #(make-coord x2 %) (range miny (+ maxy 1)))
+        all-coords (concat horiz-coords vert-coords)]
+    all-coords))
+
+(defn draw-line
+  ([grid val x1 y1 x2 y2]
+    (let [coords (get-line-coords x1 y1 x2 y2)]
+      (reduce
+        #(if (= (get-cell grid %2) :wall)
+           (put-cell %1 %2 val)
+           %1)
+        grid coords)))
+  ([grid val start end]
+    (draw-line grid val (:x start) (:y start) (:x end) (:y end))))
+
 ; misc utilities
 
 (defn get-glyph [sym]
   (cond
     (= :floor sym) \.
     (= :wall sym) \#
+    (= :corridor sym) \~
     :else \space))
 
 (defn neighbours-in-grid [grid coord]
@@ -131,6 +156,9 @@
 (defn unconnected-pairs [graph]
   (remove #(apply (partial connected? graph) %) (node-pairs graph)))
 
+(defn connected-pairs [graph]
+  (filter #(apply (partial connected? graph) %) (node-pairs graph)))
+
 (defn add-random-edge [graph]
   (apply (partial add-edge graph) (rand-nth (unconnected-pairs graph))))
 
@@ -182,24 +210,34 @@
 
 (def WORLD_HEIGHT 3)
 
-(def WORLD_TILE_WIDTH 20)
+(def WORLD_TILE_WIDTH 50)
 
-(def WORLD_TILE_HEIGHT 20)
+(def WORLD_TILE_HEIGHT 30)
+
+(defn compute-room-center [coord cell-width cell-height]
+  (make-coord
+    (+ (* (:x coord) cell-width) (quot cell-width 2))
+    (+ (* (:y coord) cell-height) (quot cell-height 2))))
 
 (defn generate-world []
   (let [world-graph (generate-world-graph WORLD_WIDTH WORLD_HEIGHT)
         blank-grid (make-grid WORLD_TILE_WIDTH WORLD_TILE_HEIGHT :wall)
         cell-width (quot WORLD_TILE_WIDTH WORLD_WIDTH)
-        cell-height (quot WORLD_TILE_HEIGHT WORLD_HEIGHT)]
-    (reduce
-      #(fill-rect-extents %1
-                          (+ (* (:x %2) cell-width) (quot cell-width 2))
-                          (+ (* (:y %2) cell-height) (quot cell-height 2))
-                          (rand-int (quot cell-width 2))
-                          (rand-int (quot cell-height 2))
-                          :floor)
-      blank-grid
-      (coords-in-rect 0 0 WORLD_WIDTH WORLD_HEIGHT))))
+        cell-height (quot WORLD_TILE_HEIGHT WORLD_HEIGHT)
+        filled-rooms (reduce
+                       #(fill-rect-extents %1
+                                           (compute-room-center %2 cell-width cell-height)
+                                           (rand-int (quot cell-width 2))
+                                           (rand-int (quot cell-height 2))
+                                           :floor)
+                       blank-grid
+                       (coords-in-rect 0 0 WORLD_WIDTH WORLD_HEIGHT))
+        connected-rooms (reduce
+                          #(apply (partial draw-line %1 :corridor) %2)
+                          filled-rooms
+                          (map #(vector (compute-room-center (first %) cell-width cell-height) (compute-room-center (second %) cell-width cell-height))
+                               (connected-pairs world-graph)))]
+    connected-rooms))
 
 ; main screen displaying stuff
 
