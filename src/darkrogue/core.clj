@@ -125,12 +125,6 @@
     (= :empty sym) \space
     :else \space))
 
-(defn neighbours-in-grid [grid coord]
-  (filter #(and (>= (:x coord) 0)
-                (>= (:y coord) 0)
-                (< (:x coord) (:width grid))
-                (< (:y coord) (:height grid)))))
-
 ; graph routines
 
 (def empty-graph {})
