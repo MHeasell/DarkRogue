@@ -109,6 +109,7 @@
     (= :floor sym) \.
     (= :wall sym) \#
     (= :corridor sym) \~
+    (= :empty sym) \space
     :else \space))
 
 (defn neighbours-in-grid [grid coord]
@@ -251,13 +252,19 @@
 
 ; main screen displaying stuff
 
+(defn get-display-item [grid coord]
+  (let [area-coords (coords-in-rect (- (:x coord) 1) (- (:y coord) 1) 3 3)]
+    (if (every? #(= :wall (get-cell grid %)) area-coords)
+      :empty
+      (get-cell grid coord))))
+
 (defn draw-level [screen level coords]
   (let [screen-size (s/get-size screen)
         screen-width (second screen-size)
         screen-height (first screen-size)
         ]
     (dorun
-      (map #(s/put-string screen (:x %) (:y %) (str (get-glyph (get-cell level (add-coord % coords)))))
+      (map #(s/put-string screen (:x %) (:y %) (str (get-glyph (get-display-item level (add-coord % coords)))))
           (for [y (range screen-width)
                 x (range screen-height)]
             (make-coord x y))))))
