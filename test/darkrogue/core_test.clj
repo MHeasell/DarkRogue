@@ -27,6 +27,19 @@
                    (add-edge :a :b)
                    (connected-to-any? :a))))))
 
+(deftest test-node-pairs [graph]
+  (testing "checks node pair generation"
+           (is (= (set  [[:a :b] [:b :a]])
+                  (set (node-pairs (graph :a :b)))))))
+
+(deftest test-unconnected-pairs [graph]
+  (testing "tests unconnected-pairs"
+           (is (= (set [[:a :b] [:b :a]])
+                  (set (-> (graph :a :b :c)
+                         (add-edge :a :c)
+                         (add-edge :b :c)
+                         (unconnected-pairs)))))))
+
 (deftest test-grid-get-put
   (testing "checks that grid get/put works"
            (is (= 0 (get-cell (make-grid 2 2 0) 0 0)))

@@ -96,6 +96,27 @@
 (defn nodes [graph]
   (keys graph))
 
+(defn node-pairs [graph]
+  (for [a (nodes graph)
+        b (nodes graph)
+        :when (not= a b)]
+    [a b]))
+
+(defn all-connected? [graph]
+  (every? #(boolean (seq %)) (map second graph)))
+
+(defn unconnected-pairs [graph]
+  (remove #(apply (partial connected? graph) %) (node-pairs graph)))
+
+(defn add-random-edge [graph]
+  (apply (partial add-edge graph) (rand-nth (unconnected-pairs graph))))
+
+(defn add-random-connections [graph num]
+  (if (= num 0)
+    graph
+    (if (seq (unconnected-pairs graph))
+      (add-random-connections (add-random-edge graph) (- num 1))
+      graph)))
 
 ; world generation
 
