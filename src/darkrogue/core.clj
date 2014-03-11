@@ -88,7 +88,7 @@
     (add-directed-edge n2 n1)))
 
 (defn connected? [graph n1 n2]
-  (contains? (n1 graph) n2))
+  (contains? (get graph n1) n2))
 
 (defn connected-to-any? [graph node]
   (boolean (seq (get graph node))))
