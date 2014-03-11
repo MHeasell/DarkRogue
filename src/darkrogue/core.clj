@@ -2,6 +2,10 @@
 
 (require '[lanterna.screen :as s])
 
+; basic utils
+(defn fmap [f m]
+  (into {} (for [[k v] m] [k (f v)])))
+
 
 ; Coordinate stuff
 
@@ -43,14 +47,34 @@
 (defn fill-rect [grid x y width height val]
  (reduce #(put-cell %1 %2 val) grid (coords-in-rect x y width height)))
 
+(defn fill-rect-extents [grid center-x center-y extent-x extent-y val]
+  (fill-rect grid
+             (- center-x extent-x)
+             (- center-y extent-y)
+             (+ (* extent-x 2) 1)
+             (+ (* extent-y 2) 1)
+             val))
+
 (defn print-grid-row [grid row]
   (println (map #(get-cell grid %1 row) (range 0 (:width grid)))))
 
 (defn print-grid [grid]
   (dorun (map #(print-grid-row grid %1) (range 0 (:height grid)))))
 
+(defn map-grid [f grid]
+  (Grid.
+    (:width grid)
+    (:height grid)
+    (fmap f (:elements grid))
+    (f (:defaultval grid))))
 
 ; misc utilities
+
+(defn get-glyph [sym]
+  (cond
+    (= :floor sym) \.
+    (= :wall sym) \#
+    :else \space))
 
 (defn neighbours-in-grid [grid coord]
   (filter #(and (>= (:x coord) 0)
@@ -63,7 +87,6 @@
         (make-coord (+ (:x coord) 1) (:y coord))
         (make-coord (:x coord) (- (:y coord) 1))
         (make-coord (:x coord) (+ (:y coord) 1))))
-
 
 ; graph routines
 
@@ -120,6 +143,8 @@
 
 ; world generation
 
+(def sample-graph (make-graph (coords-in-rect 0 0 3 3)))
+
 (defn connect-nodes-from [graph node]
   (let [node-set (set (nodes graph))
         bros (filter #(contains? node-set %1) (neighbours node))
@@ -147,11 +172,34 @@
         )
       graph)))
 
-(defn generate-world-graph
-  (-> (make-graph (coords-in-rect 0 0 3 3))
+(defn generate-world-graph [width height]
+  (-> (make-graph (coords-in-rect 0 0 width height))
     (connect-initial-chain)
     (connect-remaining-nodes)
-    (add-random-connections (rand-int 3))))
+    (add-random-connections (rand-int width))))
+
+(def WORLD_WIDTH 3)
+
+(def WORLD_HEIGHT 3)
+
+(def WORLD_TILE_WIDTH 20)
+
+(def WORLD_TILE_HEIGHT 20)
+
+(defn generate-world []
+  (let [world-graph (generate-world-graph WORLD_WIDTH WORLD_HEIGHT)
+        blank-grid (make-grid WORLD_TILE_WIDTH WORLD_TILE_HEIGHT :wall)
+        cell-width (quot WORLD_TILE_WIDTH WORLD_WIDTH)
+        cell-height (quot WORLD_TILE_HEIGHT WORLD_HEIGHT)]
+    (reduce
+      #(fill-rect-extents %1
+                          (+ (* (:x %2) cell-width) (quot cell-width 2))
+                          (+ (* (:y %2) cell-height) (quot cell-height 2))
+                          (rand-int (quot cell-width 2))
+                          (rand-int (quot cell-height 2))
+                          :floor)
+      blank-grid
+      (coords-in-rect 0 0 WORLD_WIDTH WORLD_HEIGHT))))
 
 ; main screen displaying stuff
 
