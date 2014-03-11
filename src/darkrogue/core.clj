@@ -29,6 +29,13 @@
         x (range x (+ width x))]
     (make-coord x y)))
 
+(defn neighbour-eight [coord]
+  (for [dy [-1 0 1]
+        dx [-1 0 1]
+        :when (not (= 0 dy dx))]
+    (make-coord
+      (+ (:x coord) dx)
+      (+ (:y coord) dy))))
 
 ; Grid stuff
 
