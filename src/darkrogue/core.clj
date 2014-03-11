@@ -14,6 +14,16 @@
 (defn make-coord [x y]
   (Coordinate. x y))
 
+(defn add-coord [a b]
+  (make-coord
+    (+ (:x a) (:x b))
+    (+ (:y a) (:y b))))
+
+(defn sub-coord [a b]
+  (make-coord
+    (- (:x a) (:x b))
+    (- (:y a) (:y b))))
+
 (defn coords-in-rect [x y width height]
   (for [y (range y (+ height y))
         x (range x (+ width x))]
@@ -241,14 +251,33 @@
 
 ; main screen displaying stuff
 
+(defn draw-level [screen level coords]
+  (let [screen-size (s/get-size screen)
+        screen-width (second screen-size)
+        screen-height (first screen-size)
+        ]
+    (dorun
+      (map #(s/put-string screen (:x %) (:y %) (str (get-glyph (get-cell level (add-coord % coords)))))
+          (for [y (range screen-width)
+                x (range screen-height)]
+            (make-coord x y))))))
+
+(defn main-loop [screen]
+  (draw-level screen (generate-world) (make-coord 0 0))
+  (s/redraw screen)
+  (if (= (s/get-key-blocking screen) \d)
+    nil
+    (recur screen)))
+
 (defn main [screen-type]
   (let [screen (s/get-screen screen-type)]
     (s/in-screen screen
                  (s/put-string screen 0 0 "DarkRogue" {:styles #{:bold}})
                  (s/put-string screen 0 1 "A RogueLike game by Michael Heasell")
-                 (s/put-string screen 0 2 "Press any key to exit...")
+                 (s/put-string screen 0 2 "Press any key to generate level, D to exit.")
                  (s/redraw screen)
-                 (s/get-key-blocking screen))))
+                 (s/get-key-blocking screen)
+                 (main-loop screen))))
 
 (defn -main [& args]
   (let [args (set args)

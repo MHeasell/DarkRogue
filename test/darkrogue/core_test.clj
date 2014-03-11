@@ -65,4 +65,9 @@
                         (make-coord 2 4))
                   (neighbours (make-coord 2 3))))))
 
+(deftest test-add-coord
+  (testing "test coord addition"
+           (is (= (make-coord 3 5)
+                  (add-coord (make-coord 1 2) (make-coord 2 3))))))
+
 (run-tests)
