@@ -29,6 +29,12 @@
         x (range x (+ width x))]
     (make-coord x y)))
 
+(defn neighbours [coord]
+  (list (make-coord (- (:x coord) 1) (:y coord))
+        (make-coord (+ (:x coord) 1) (:y coord))
+        (make-coord (:x coord) (- (:y coord) 1))
+        (make-coord (:x coord) (+ (:y coord) 1))))
+
 (defn neighbour-eight [coord]
   (for [dy [-1 0 1]
         dx [-1 0 1]
@@ -124,12 +130,6 @@
                 (>= (:y coord) 0)
                 (< (:x coord) (:width grid))
                 (< (:y coord) (:height grid)))))
-
-(defn neighbours [coord]
-  (list (make-coord (- (:x coord) 1) (:y coord))
-        (make-coord (+ (:x coord) 1) (:y coord))
-        (make-coord (:x coord) (- (:y coord) 1))
-        (make-coord (:x coord) (+ (:y coord) 1))))
 
 ; graph routines
 
