@@ -24,6 +24,16 @@
                     (move-player (make-coord 0 -1))
                     (get-in [:player :position]))))))
 
+(deftest test-move-enemies
+  (testing "tests that enemies block movement"
+           (is (= (make-coord 1 2)
+                  (-> (make-grid 3 3 :floor)
+                    (make-universe)
+                    (spawn-player (make-coord 1 2))
+                    (spawn-enemy (make-coord 1 1))
+                    (move-player (make-coord 0 -1))
+                    (get-in [:player :position]))))))
+
 (deftest test-width
   (testing "tests universe width function"
            (is (= 4 (-> (make-grid 4 5 :empty)

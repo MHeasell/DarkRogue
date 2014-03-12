@@ -34,7 +34,8 @@
   (get-in universe [:terrain :height]))
 
 (defn point-occupied? [universe coord]
-  (is-obstacle? (:terrain universe) coord))
+  (or (is-obstacle? (:terrain universe) coord)
+      (contains? (:enemies universe) coord)))
 
 (defn put-tile [universe coord val]
   (assoc universe :terrain (g/put-cell (:terrain universe) coord val)))
