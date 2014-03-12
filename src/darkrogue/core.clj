@@ -7,17 +7,6 @@
 (use 'darkrogue.grid)
 (use 'darkrogue.worldgen)
 
-(defn draw-line
-  ([grid val x1 y1 x2 y2]
-    (let [coords (get-line-coords x1 y1 x2 y2)]
-      (reduce
-        #(if (= (get-cell grid %2) :wall)
-           (put-cell %1 %2 val)
-           %1)
-        grid coords)))
-  ([grid val start end]
-    (draw-line grid val (:x start) (:y start) (:x end) (:y end))))
-
 ; misc utilities
 
 (defn get-glyph [sym]
@@ -27,39 +16,6 @@
     (= :corridor sym) \~
     (= :empty sym) \space
     :else \space))
-
-(def WORLD_WIDTH 3)
-
-(def WORLD_HEIGHT 3)
-
-(def WORLD_TILE_WIDTH 50)
-
-(def WORLD_TILE_HEIGHT 30)
-
-(defn compute-room-center [coord cell-width cell-height]
-  (make-coord
-    (+ (* (:x coord) cell-width) (quot cell-width 2))
-    (+ (* (:y coord) cell-height) (quot cell-height 2))))
-
-(defn generate-world []
-  (let [world-graph (generate-world-graph WORLD_WIDTH WORLD_HEIGHT)
-        blank-grid (make-grid WORLD_TILE_WIDTH WORLD_TILE_HEIGHT :wall)
-        cell-width (quot WORLD_TILE_WIDTH WORLD_WIDTH)
-        cell-height (quot WORLD_TILE_HEIGHT WORLD_HEIGHT)
-        filled-rooms (reduce
-                       #(fill-rect-extents %1
-                                           (compute-room-center %2 cell-width cell-height)
-                                           (rand-int (quot cell-width 2))
-                                           (rand-int (quot cell-height 2))
-                                           :floor)
-                       blank-grid
-                       (coords-in-rect 0 0 WORLD_WIDTH WORLD_HEIGHT))
-        connected-rooms (reduce
-                          #(apply (partial draw-line %1 :corridor) %2)
-                          filled-rooms
-                          (map #(vector (compute-room-center (first %) cell-width cell-height) (compute-room-center (second %) cell-width cell-height))
-                               (connected-pairs world-graph)))]
-    connected-rooms))
 
 ; main screen displaying stuff
 
