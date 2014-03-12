@@ -5,4 +5,5 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [clojure-lanterna "0.9.4"]
-                 [org.clojure/tools.trace "0.7.6"]])
+                 [org.clojure/tools.trace "0.7.6"]]
+  :main darkrogue.core)
