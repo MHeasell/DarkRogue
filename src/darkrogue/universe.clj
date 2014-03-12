@@ -5,15 +5,24 @@
 
 (def PLAYER_HP 100)
 
+(def ENEMY_HP 100)
+
 (defrecord Player [position health])
 
-(defrecord Universe [player terrain])
+(defrecord Enemy [position health])
+
+; terrain is a grid of cells
+; enemies is a map of coord -> enemy data
+(defrecord Universe [player terrain enemies])
 
 (defn make-universe [terrain]
-  (Universe. nil terrain))
+  (Universe. nil terrain {}))
 
 (defn spawn-player [universe position]
   (assoc universe :player (Player. position PLAYER_HP)))
+
+(defn spawn-enemy [universe position]
+  (assoc-in universe [:enemies position] (Enemy. position ENEMY_HP)))
 
 (defn is-obstacle? [terrain coord]
   (= :wall (g/get-cell terrain coord)))

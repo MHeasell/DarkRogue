@@ -36,14 +36,23 @@
             (make-coord x y))))))
 
 (def PLAYER_GLYPH \@)
+(def ENEMY_GLYPH \@)
 
 (defn draw-player [screen player offset]
   (let [computed-coord (add-coord (:position player) offset)]
     (s/put-string screen (:x computed-coord) (:y computed-coord) (str PLAYER_GLYPH))))
 
+(defn draw-enemy [screen enemy offset]
+  (let [computed-coord (add-coord (:position enemy) offset)]
+    (s/put-string screen (:x computed-coord) (:y computed-coord) (str ENEMY_GLYPH))))
+
+(defn draw-enemies [screen universe offset]
+  (dorun (map #(draw-enemy screen % offset) (vals (:enemies universe)))))
+
 (defn draw-universe [screen universe]
   (let [camera-offset (make-coord 0 0)]
     (draw-level screen (:terrain universe) camera-offset)
+    (draw-enemies screen universe camera-offset)
     (draw-player screen (:player universe) camera-offset)))
 
 ; player commands
@@ -96,11 +105,19 @@
       (find-empty-spot universe)
       candidate)))
 
+(defn spawn-random [universe spawn-func]
+  (spawn-func universe (find-empty-spot universe)))
+
+(defn init-universe []
+  (-> (generate-world)
+    (make-universe)
+    (spawn-random spawn-player)
+    (spawn-random spawn-enemy)
+    (spawn-random spawn-enemy)
+    (spawn-random spawn-enemy)))
+
 (defn start-game [screen]
-  (let [world (generate-world)
-        universe (make-universe world)
-        ready-universe (spawn-player universe (find-empty-spot universe))]
-    (game-loop screen ready-universe)))
+  (game-loop screen (init-universe)))
 
 (defn main [screen-type]
   (let [screen (s/get-screen screen-type)]
