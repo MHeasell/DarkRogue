@@ -6,6 +6,7 @@
 (use 'darkrogue.coord)
 (use 'darkrogue.grid)
 (use 'darkrogue.worldgen)
+(use 'darkrogue.universe)
 
 ; level drawing stuff
 
@@ -34,14 +35,37 @@
                 x (range screen-height)]
             (make-coord x y))))))
 
+; player commands
+
+(defn go-left [universe]
+  (move-player universe (make-coord -1 0)))
+
+(defn go-right [universe]
+  (move-player universe (make-coord 1 0)))
+
+(defn go-up [universe]
+  (move-player universe (make-coord 0 -1)))
+
+(defn go-down [universe]
+  (move-player universe (make-coord 0 1)))
+
+
 ; main game initialization
 
-(defn input-to-command [input]
-  (cond
-    (= input :left) :walk-left
-    (= input :right) :walk-right
-    (= input :up) :walk-up
-    (= input :down) :walk-down))
+(def input-command-mapping
+  {:left go-left
+   :right go-right
+   :up go-up
+   :down go-down
+   \w go-up
+   \a go-left
+   \s go-down
+   \d go-right})
+
+(defn apply-input [universe input]
+  (let [f (get input-command-mapping input)]
+    (when f
+      (f universe))))
 
 (defn main-loop [screen]
   (draw-level screen (generate-world) (make-coord 0 0))
