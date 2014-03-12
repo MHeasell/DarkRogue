@@ -1,4 +1,4 @@
-(ns darkrogue.universe
+(ns darkrogue.universe-test
   (:require [clojure.test :refer :all]
             [darkrogue.coord :refer :all] 
             [darkrogue.universe :refer :all]
