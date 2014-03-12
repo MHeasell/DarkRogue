@@ -36,6 +36,13 @@
 
 ; main game initialization
 
+(defn input-to-command [input]
+  (cond
+    (= input :left) :walk-left
+    (= input :right) :walk-right
+    (= input :up) :walk-up
+    (= input :down) :walk-down))
+
 (defn main-loop [screen]
   (draw-level screen (generate-world) (make-coord 0 0))
   (s/redraw screen)
