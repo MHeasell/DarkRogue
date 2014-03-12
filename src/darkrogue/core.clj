@@ -7,7 +7,7 @@
 (use 'darkrogue.grid)
 (use 'darkrogue.worldgen)
 
-; misc utilities
+; level drawing stuff
 
 (defn get-glyph [sym]
   (cond
@@ -16,8 +16,6 @@
     (= :corridor sym) \~
     (= :empty sym) \space
     :else \space))
-
-; main screen displaying stuff
 
 (defn get-display-item [grid coord]
   (let [area-coords (coords-in-rect (- (:x coord) 1) (- (:y coord) 1) 3 3)]
@@ -35,6 +33,8 @@
           (for [y (range screen-width)
                 x (range screen-height)]
             (make-coord x y))))))
+
+; main game initialization
 
 (defn main-loop [screen]
   (draw-level screen (generate-world) (make-coord 0 0))
