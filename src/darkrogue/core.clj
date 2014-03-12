@@ -86,13 +86,6 @@
       (when new-universe
       (recur screen new-universe))))
 
-(defn main-loop [screen]
-  (draw-level screen (generate-world) (make-coord 0 0))
-  (s/redraw screen)
-  (if (= (s/get-key-blocking screen) \d)
-    nil
-    (recur screen)))
-
 (defn random-point-in-universe [universe]
   (make-coord (rand-int (universe-width universe))
               (rand-int (universe-height universe))))
