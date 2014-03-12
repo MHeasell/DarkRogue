@@ -4,7 +4,7 @@
             [darkrogue.universe :refer :all]
             [darkrogue.grid :refer :all]))
 
-(def example-terrain (make-grid 3 3 :empty))
+(def example-terrain (make-grid 3 3 :floor))
 
 (deftest test-move
   (testing "tests that movement moves the player"
@@ -12,6 +12,16 @@
                   (-> (make-universe example-terrain)
                     (spawn-player (make-coord 1 2))
                     (move-player (make-coord 2 3))
+                    (get-in [:player :position]))))))
+
+(deftest test-move-obstacles
+  (testing "tests that obstacles block movement"
+           (is (= (make-coord 1 2)
+                  (-> (make-grid 3 3 :floor)
+                    (make-universe)
+                    (spawn-player (make-coord 1 2))
+                    (put-tile (make-coord 1 1) :wall)
+                    (move-player (make-coord 0 -1))
                     (get-in [:player :position]))))))
 
 (deftest test-width

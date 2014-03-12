@@ -15,9 +15,6 @@
 (defn spawn-player [universe position]
   (assoc universe :player (Player. position PLAYER_HP)))
 
-(defn move-player [universe offset]
-  (update-in universe [:player :position] (partial c/add-coord offset)))
-
 (defn is-obstacle? [terrain coord]
   (= :wall (g/get-cell terrain coord)))
 
@@ -29,3 +26,13 @@
 
 (defn point-occupied? [universe coord]
   (is-obstacle? (:terrain universe) coord))
+
+(defn put-tile [universe coord val]
+  (assoc universe :terrain (g/put-cell (:terrain universe) coord val)))
+
+(defn move-player [universe offset]
+  (let
+    [newpos (c/add-coord (get-in universe [:player :position]) offset)]
+    (if (not (point-occupied? universe newpos))
+      (assoc-in universe [:player :position] newpos)
+      universe)))

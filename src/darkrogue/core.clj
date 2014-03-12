@@ -72,7 +72,7 @@
    \a go-left
    \s go-down
    \d go-right
-   \x #(java.lang.System/exit 0)})
+   \x (fn [u] nil)})
 
 (defn apply-input [universe input]
   (let [f (get input-command-mapping input)]
@@ -82,8 +82,9 @@
 (defn game-loop [screen universe]
     (draw-universe screen universe)
     (s/redraw screen)
-    (recur screen
-           (apply-input universe (s/get-key-blocking screen))))
+    (let [new-universe (apply-input universe (s/get-key-blocking screen))]
+      (when new-universe
+      (recur screen new-universe))))
 
 (defn main-loop [screen]
   (draw-level screen (generate-world) (make-coord 0 0))
