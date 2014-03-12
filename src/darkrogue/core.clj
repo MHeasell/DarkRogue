@@ -35,6 +35,17 @@
                 x (range screen-height)]
             (make-coord x y))))))
 
+(def PLAYER_GLYPH \@)
+
+(defn draw-player [screen player offset]
+  (let [computed-coord (add-coord (:position player) offset)]
+    (s/put-string screen (:x computed-coord) (:y computed-coord) (str PLAYER_GLYPH))))
+
+(defn draw-universe [screen universe]
+  (let [camera-offset (make-coord 0 0)]
+    (draw-level screen (:terrain universe) camera-offset)
+    (draw-player screen (:player universe) camera-offset)))
+
 ; player commands
 
 (defn go-left [universe]
@@ -60,12 +71,19 @@
    \w go-up
    \a go-left
    \s go-down
-   \d go-right})
+   \d go-right
+   \x #(java.lang.System/exit 0)})
 
 (defn apply-input [universe input]
   (let [f (get input-command-mapping input)]
     (when f
       (f universe))))
+
+(defn game-loop [screen universe]
+    (draw-universe screen universe)
+    (s/redraw screen)
+    (recur screen
+           (apply-input universe (s/get-key-blocking screen))))
 
 (defn main-loop [screen]
   (draw-level screen (generate-world) (make-coord 0 0))
@@ -74,15 +92,31 @@
     nil
     (recur screen)))
 
+(defn random-point-in-universe [universe]
+  (make-coord (rand-int (universe-width universe))
+              (rand-int (universe-height universe))))
+
+(defn find-empty-spot [universe]
+  (let [candidate (random-point-in-universe universe)]
+    (if (point-occupied? universe candidate)
+      (find-empty-spot universe)
+      candidate)))
+
+(defn start-game [screen]
+  (let [world (generate-world)
+        universe (make-universe world)
+        ready-universe (spawn-player universe (find-empty-spot universe))]
+    (game-loop screen ready-universe)))
+
 (defn main [screen-type]
   (let [screen (s/get-screen screen-type)]
     (s/in-screen screen
                  (s/put-string screen 0 0 "DarkRogue" {:styles #{:bold}})
                  (s/put-string screen 0 1 "A RogueLike game by Michael Heasell")
-                 (s/put-string screen 0 2 "Press any key to generate level, D to exit.")
+                 (s/put-string screen 0 2 "Press any key to start...")
                  (s/redraw screen)
                  (s/get-key-blocking screen)
-                 (main-loop screen))))
+                 (start-game screen))))
 
 (defn -main [& args]
   (let [args (set args)

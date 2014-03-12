@@ -14,4 +14,29 @@
                     (move-player (make-coord 2 3))
                     (get-in [:player :position]))))))
 
+(deftest test-width
+  (testing "tests universe width function"
+           (is (= 4 (-> (make-grid 4 5 :empty)
+                      (make-universe)
+                      (universe-width))))))
+
+(deftest test-height
+  (testing "tests universe width function"
+           (is (= 2 (-> (make-grid 2 6 :empty)
+                      (make-universe)
+                      (universe-width))))))
+
+(deftest test-point-occupied?
+  (testing "tests that point-occupied works"
+           (is (true?
+                 (->
+                   (make-grid 3 3 :wall)
+                   (make-universe)
+                   (point-occupied? (make-coord 2 2)))))
+           (is (false?
+                 (->
+                   (make-grid 3 3 :empty)
+                   (make-universe)
+                   (point-occupied? (make-coord 2 2)))))))
+
 (run-tests)
