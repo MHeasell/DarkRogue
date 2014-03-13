@@ -116,12 +116,25 @@
 (defn tick-universe [universe]
   (remove-dead-enemies universe))
 
+(defn game-win [screen universe]
+  (s/put-string screen 20 10 (apply str (repeat 25 \space)))
+  (s/put-string screen 20 11 (apply str (repeat 25 \space)))
+  (s/put-string screen 20 12 (apply str (repeat 25 \space)))
+  (s/put-string screen 21 11 "Assassination complete!")
+  (s/redraw screen)
+  (loop [key (s/get-key-blocking screen)]
+    (if (= \x key)
+      nil
+      (recur (s/get-key-blocking screen)))))
+
 (defn game-loop [screen universe]
     (draw-universe screen universe)
     (s/redraw screen)
     (let [new-universe (apply-input universe (s/get-key-blocking screen))]
       (when new-universe
-      (recur screen (tick-universe new-universe)))))
+      (if (is-game-won? new-universe)
+        (game-win screen universe)
+        (recur screen (tick-universe new-universe))))))
 
 (defn random-point-in-universe [universe]
   (make-coord (rand-int (universe-width universe))
