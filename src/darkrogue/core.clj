@@ -36,22 +36,31 @@
             (make-coord x y))))))
 
 (def PLAYER_GLYPH \@)
-(def ENEMY_GLYPH \@)
+(def ENEMY_GLYPH \G)
+(def BIG_BAD_GLYPH \@)
 
 (defn draw-player [screen player offset]
   (let [computed-coord (add-coord (:position player) offset)]
-    (s/put-string screen (:x computed-coord) (:y computed-coord) (str PLAYER_GLYPH))))
+    (s/put-string screen
+                  (:x computed-coord)
+                  (:y computed-coord)
+                  (str PLAYER_GLYPH)
+                  {:fg :white})))
 
 (defn draw-guard [screen enemy offset]
   (let [computed-coord (add-coord (:position enemy) offset)]
-    (s/put-string screen (:x computed-coord) (:y computed-coord) (str ENEMY_GLYPH))))
+    (s/put-string screen
+                  (:x computed-coord)
+                  (:y computed-coord)
+                  (str ENEMY_GLYPH)
+                  {:fg :yellow})))
 
 (defn draw-big-bad [screen enemy offset]
   (let [computed-coord (add-coord (:position enemy) offset)]
     (s/put-string screen
                   (:x computed-coord)
                   (:y computed-coord)
-                  (str ENEMY_GLYPH)
+                  (str BIG_BAD_GLYPH)
                   {:fg :red})))
 
 (defn draw-enemy [screen enemy offset]
