@@ -85,8 +85,9 @@
 
 (defn apply-input [universe input]
   (let [f (get input-command-mapping input)]
-    (when f
-      (f universe))))
+    (if f
+      (f universe)
+      universe)))
 
 (defn game-loop [screen universe]
     (draw-universe screen universe)
