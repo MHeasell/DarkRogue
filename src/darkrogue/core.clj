@@ -42,9 +42,21 @@
   (let [computed-coord (add-coord (:position player) offset)]
     (s/put-string screen (:x computed-coord) (:y computed-coord) (str PLAYER_GLYPH))))
 
-(defn draw-enemy [screen enemy offset]
+(defn draw-guard [screen enemy offset]
   (let [computed-coord (add-coord (:position enemy) offset)]
     (s/put-string screen (:x computed-coord) (:y computed-coord) (str ENEMY_GLYPH))))
+
+(defn draw-big-bad [screen enemy offset]
+  (let [computed-coord (add-coord (:position enemy) offset)]
+    (s/put-string screen
+                  (:x computed-coord)
+                  (:y computed-coord)
+                  (str ENEMY_GLYPH)
+                  {:fg :red})))
+
+(defn draw-enemy [screen enemy offset]
+  (cond (= :guard (:type enemy)) (draw-guard screen enemy offset)
+        (= :big-bad (:type enemy)) (draw-big-bad screen enemy offset)))
 
 (defn draw-enemies [screen universe offset]
   (dorun (map #(draw-enemy screen % offset) (vals (:enemies universe)))))
@@ -130,7 +142,9 @@
     (spawn-random spawn-player)
     (spawn-random spawn-enemy)
     (spawn-random spawn-enemy)
-    (spawn-random spawn-enemy)))
+    (spawn-random spawn-enemy)
+    (spawn-random spawn-big-bad)
+    ))
 
 (defn start-game [screen]
   (game-loop screen (init-universe)))
