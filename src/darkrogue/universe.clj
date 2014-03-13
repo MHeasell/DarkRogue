@@ -8,9 +8,11 @@
 
 (def ENEMY_HP 100)
 
+(def BIG_BAD_HP 100)
+
 (defrecord Player [position health])
 
-(defrecord Enemy [position health])
+(defrecord Enemy [position health type])
 
 ; terrain is a grid of cells
 ; enemies is a map of coord -> enemy data
@@ -20,7 +22,10 @@
   (Universe. nil terrain {}))
 
 (defn make-enemy [position health]
-  (Enemy. position health))
+  (Enemy. position health :guard))
+
+(defn make-big-bad [position health]
+  (Enemy. position health :big-bad))
 
 (defn add-enemy [universe enemy]
   (assoc-in universe [:enemies (:position enemy)] enemy))
@@ -29,7 +34,10 @@
   (assoc universe :player (Player. position PLAYER_HP)))
 
 (defn spawn-enemy [universe position]
-  (assoc-in universe [:enemies position] (Enemy. position ENEMY_HP)))
+  (assoc-in universe [:enemies position] (make-enemy position ENEMY_HP)))
+
+(defn spawn-big-bad [universe position]
+  (assoc-in universe [:enemies position] (make-big-bad position BIG_BAD_HP)))
 
 (defn is-obstacle? [terrain coord]
   (= :wall (g/get-cell terrain coord)))
@@ -70,6 +78,12 @@
 
 (defn is-dead? [enemy]
   (<= (:health enemy) 0))
+
+(defn is-big-bad? [enemy]
+  (= (:type enemy) :big-bad))
+
+(defn is-game-won? [universe]
+  (boolean (some (every-pred is-big-bad? is-dead?) (vals (:enemies universe)))))
 
 (defn remove-dead-enemies [universe]
   (update-in universe [:enemies] (partial u/remove-vals is-dead?)))

@@ -88,4 +88,22 @@
                    (remove-dead-enemies)
                    (:enemies))))))
 
+(deftest test-is-game-won?
+  (testing "tests that the game is won when big bad is dead"
+           (is (true?
+                 (-> (make-grid 3 3 :floor)
+                   (make-universe)
+                   (add-enemy (make-big-bad (make-coord 1 1) 0))
+                   (is-game-won?))))
+           (is (false?
+                 (-> (make-grid 3 3 :floor)
+                   (make-universe)
+                   (add-enemy (make-enemy (make-coord 1 1) 0))
+                   (is-game-won?))))
+           (is false?
+               (-> (make-grid 3 3 :floor)
+                   (make-universe)
+                   (add-enemy (make-big-bad (make-coord 1 1) 10))
+                   (is-game-won?)))))
+
 (run-tests)
