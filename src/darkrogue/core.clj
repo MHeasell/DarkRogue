@@ -57,18 +57,30 @@
 
 ; player commands
 
+(def unit-left (make-coord -1 0))
+(def unit-right (make-coord 1 0))
+(def unit-up (make-coord 0 -1))
+(def unit-down (make-coord 0 1))
+
+(defn context-action [universe offset]
+  (let [new-coord (add-coord offset
+                             (get-in universe [:player :position]))
+        enemy (get-enemy-at universe new-coord)]
+    (if enemy
+      (hit-enemy-offset universe offset)
+      (move-player universe offset))))
+
 (defn go-left [universe]
-  (move-player universe (make-coord -1 0)))
+  (context-action universe unit-left))
 
 (defn go-right [universe]
-  (move-player universe (make-coord 1 0)))
+  (context-action universe unit-right))
 
 (defn go-up [universe]
-  (move-player universe (make-coord 0 -1)))
+  (context-action universe unit-up))
 
 (defn go-down [universe]
-  (move-player universe (make-coord 0 1)))
-
+  (context-action universe unit-down))
 
 ; main game initialization
 
@@ -89,12 +101,15 @@
       (f universe)
       universe)))
 
+(defn tick-universe [universe]
+  (remove-dead-enemies universe))
+
 (defn game-loop [screen universe]
     (draw-universe screen universe)
     (s/redraw screen)
     (let [new-universe (apply-input universe (s/get-key-blocking screen))]
       (when new-universe
-      (recur screen new-universe))))
+      (recur screen (tick-universe new-universe)))))
 
 (defn random-point-in-universe [universe]
   (make-coord (rand-int (universe-width universe))

@@ -59,4 +59,33 @@
                    (make-universe)
                    (point-occupied? (make-coord 2 2)))))))
 
+(deftest test-get-enemy
+  (testing "tests enemy retrieval"
+           (is (= (make-enemy (make-coord 1 1) 100)
+                 (-> (make-grid 3 3 :wall)
+                   (make-universe)
+                   (spawn-enemy (make-coord 1 1))
+                   (get-enemy-at (make-coord 1 1)))))))
+
+(deftest test-hit-enemy
+  (testing "tests that enemies get damaged properly"
+           (is (= 0
+                  (-> (make-grid 3 3 :wall)
+                   (make-universe)
+                   (spawn-enemy (make-coord 1 1))
+                   (hit-enemy (make-coord 1 1))
+                   (get-enemy-at (make-coord 1 1))
+                   (:health))))))
+
+(deftest test-remove-dead-enemies
+  (testing "tests that dead enemies are removed"
+           (is (= {(make-coord 1 1) (make-enemy (make-coord 1 1) 10)}
+                  (-> (make-grid 3 3 :wall)
+                   (make-universe)
+                   (add-enemy (make-enemy (make-coord 1 1) 0))
+                   (add-enemy (make-enemy (make-coord 1 1) -1))
+                   (add-enemy (make-enemy (make-coord 1 1) 10))
+                   (remove-dead-enemies)
+                   (:enemies))))))
+
 (run-tests)
