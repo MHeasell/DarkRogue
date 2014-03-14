@@ -27,15 +27,18 @@
 (defn get-glyph-in-universe [universe coord]
   (get-glyph (get-display-item (:terrain universe) coord)))
 
+(defn draw-level-tile [screen universe level-coord screen-coord]
+  (s/put-string screen (:x screen-coord) (:y screen-coord) (str (get-glyph-in-universe universe level-coord))))
+
 (defn draw-level [screen universe coords]
   (let [screen-size (s/get-size screen)
         screen-width (second screen-size)
         screen-height (first screen-size)]
     (dorun
-      (map #(s/put-string screen (:x %) (:y %) (str (get-glyph-in-universe universe (add-coord % coords))))
-          (for [y (range screen-width)
-                x (range screen-height)]
-            (make-coord x y))))))
+      (map #(draw-level-tile screen universe (add-coord % coords) %)
+           (for [y (range screen-width)
+                 x (range screen-height)]
+             (make-coord x y))))))
 
 
 (def PLAYER_GLYPH \@)
