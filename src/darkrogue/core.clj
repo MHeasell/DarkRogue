@@ -24,16 +24,20 @@
       :empty
       (get-cell grid coord))))
 
-(defn draw-level [screen level coords]
+(defn get-glyph-in-universe [universe coord]
+  (get-glyph (get-display-item (:terrain universe) coord)))
+
+(defn draw-level [screen universe coords]
   (let [screen-size (s/get-size screen)
         screen-width (second screen-size)
         screen-height (first screen-size)
         ]
     (dorun
-      (map #(s/put-string screen (:x %) (:y %) (str (get-glyph (get-display-item level (add-coord % coords)))))
+      (map #(s/put-string screen (:x %) (:y %) (str (get-glyph-in-universe universe (add-coord % coords))))
           (for [y (range screen-width)
                 x (range screen-height)]
             (make-coord x y))))))
+
 
 (def PLAYER_GLYPH \@)
 (def ENEMY_GLYPH \G)
@@ -72,7 +76,7 @@
 
 (defn draw-universe [screen universe]
   (let [camera-offset (make-coord 0 0)]
-    (draw-level screen (:terrain universe) camera-offset)
+    (draw-level screen universe camera-offset)
     (draw-enemies screen universe camera-offset)
     (draw-player screen (:player universe) camera-offset)))
 
