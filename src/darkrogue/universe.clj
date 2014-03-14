@@ -14,6 +14,9 @@
 (defrecord Player [position health])
 
 (defrecord Enemy [position health type facing])
+(def directions #{:up :down :left :right})
+(defn random-direction []
+  (rand-nth (seq directions)))
 
 ; terrain is a grid of cells
 ; enemies is a map of coord -> enemy data
@@ -23,11 +26,11 @@
 (defn make-universe [terrain]
   (Universe. nil terrain {} {}))
 
-(defn make-enemy [position health]
-  (Enemy. position health :guard :up))
+(defn make-enemy [position health direction]
+  (Enemy. position health :guard direction))
 
-(defn make-big-bad [position health]
-  (Enemy. position health :big-bad :up))
+(defn make-big-bad [position health direction]
+  (Enemy. position health :big-bad direction))
 
 (defn add-enemy [universe enemy]
   (assoc-in universe [:enemies (:position enemy)] enemy))
@@ -36,10 +39,12 @@
   (assoc universe :player (Player. position PLAYER_HP)))
 
 (defn spawn-enemy [universe position]
-  (assoc-in universe [:enemies position] (make-enemy position ENEMY_HP)))
+  (assoc-in universe [:enemies position]
+            (make-enemy position ENEMY_HP (random-direction))))
 
 (defn spawn-big-bad [universe position]
-  (assoc-in universe [:enemies position] (make-big-bad position BIG_BAD_HP)))
+  (assoc-in universe [:enemies position]
+            (make-big-bad position BIG_BAD_HP (random-direction))))
 
 (defn is-obstacle? [terrain coord]
   (= :wall (g/get-cell terrain coord)))
