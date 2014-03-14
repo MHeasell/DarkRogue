@@ -30,8 +30,7 @@
 (defn draw-level [screen universe coords]
   (let [screen-size (s/get-size screen)
         screen-width (second screen-size)
-        screen-height (first screen-size)
-        ]
+        screen-height (first screen-size)]
     (dorun
       (map #(s/put-string screen (:x %) (:y %) (str (get-glyph-in-universe universe (add-coord % coords))))
           (for [y (range screen-width)
