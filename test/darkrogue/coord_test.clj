@@ -24,3 +24,13 @@
                         (make-coord 4 5)
                         (make-coord 5 5))
                   (coords-in-rect 4 4 2 2)))))
+
+
+(deftest test-in-rect
+  (testing "checks that in-rect works"
+           (is (true?
+                 (in-rect? (make-coord 2 3) 1 1 4 4)))
+           (is (false?
+                 (in-rect? (make-coord 3 3) 0 0 3 3)))))
+
+(run-tests)

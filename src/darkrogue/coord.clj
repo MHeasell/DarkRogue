@@ -15,6 +15,12 @@
     (- (:x a) (:x b))
     (- (:y a) (:y b))))
 
+(defn in-rect? [coord x y width height]
+  (and (>= (:x coord) x)
+       (>= (:y coord) y)
+       (< (:x coord) (+ x width))
+       (< (:y coord) (+ y height))))
+
 (defn coords-in-rect [x y width height]
   (for [y (range y (+ height y))
         x (range x (+ width x))]

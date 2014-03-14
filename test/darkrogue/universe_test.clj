@@ -106,4 +106,16 @@
                    (add-enemy (make-big-bad (make-coord 1 1) 10))
                    (is-game-won?)))))
 
+(deftest test-blocks-vision?
+  (testing "tests that vision is blocked properly"
+           (is (true?
+                 (-> (make-grid 3 3 :floor)
+                   (make-universe)
+                   (put-tile (make-coord 1 1) :wall)
+                   (blocks-vision? (make-coord 1 1)))))
+           (is (false?
+                 (-> (make-grid 3 3 :floor)
+                   (make-universe)
+                   (blocks-vision? (make-coord 1 1)))))))
+
 (run-tests)

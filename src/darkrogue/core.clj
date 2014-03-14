@@ -28,7 +28,9 @@
   (get-glyph (get-display-item (:terrain universe) coord)))
 
 (defn draw-level-tile [screen universe level-coord screen-coord]
-  (s/put-string screen (:x screen-coord) (:y screen-coord) (str (get-glyph-in-universe universe level-coord))))
+  (let [glyph-str (str (get-glyph-in-universe universe level-coord))
+        attrs (if (visible-by-any? universe level-coord) {:bg :white :fg :black} {})]
+    (s/put-string screen (:x screen-coord) (:y screen-coord) glyph-str attrs)))
 
 (defn draw-level [screen universe coords]
   (let [screen-size (s/get-size screen)
@@ -129,7 +131,9 @@
       universe)))
 
 (defn tick-universe [universe]
-  (remove-dead-enemies universe))
+  (-> universe
+    (remove-dead-enemies)
+    (update-enemy-vision)))
 
 (defn game-win [screen universe]
   (s/put-string screen 20 10 (apply str (repeat 25 \space)))

@@ -1,7 +1,8 @@
 (ns darkrogue.universe
   (:require [darkrogue.util :as u])
   (:require [darkrogue.coord :as c])
-  (:require [darkrogue.grid :as g]))
+  (:require [darkrogue.grid :as g])
+  (:require [darkrogue.rlforj :as los]))
 
 
 (def PLAYER_HP 100)
@@ -12,20 +13,21 @@
 
 (defrecord Player [position health])
 
-(defrecord Enemy [position health type])
+(defrecord Enemy [position health type facing])
 
 ; terrain is a grid of cells
 ; enemies is a map of coord -> enemy data
-(defrecord Universe [player terrain enemies])
+; vismap is a map of coord -> set of occupied coords that can see this
+(defrecord Universe [player terrain enemies vismap])
 
 (defn make-universe [terrain]
-  (Universe. nil terrain {}))
+  (Universe. nil terrain {} {}))
 
 (defn make-enemy [position health]
-  (Enemy. position health :guard))
+  (Enemy. position health :guard :up))
 
 (defn make-big-bad [position health]
-  (Enemy. position health :big-bad))
+  (Enemy. position health :big-bad :up))
 
 (defn add-enemy [universe enemy]
   (assoc-in universe [:enemies (:position enemy)] enemy))
@@ -51,6 +53,8 @@
 (defn point-occupied? [universe coord]
   (or (is-obstacle? (:terrain universe) coord)
       (contains? (:enemies universe) coord)))
+
+(defn blocks-vision? [universe coord] (is-obstacle? (:terrain universe) coord))
 
 (defn put-tile [universe coord val]
   (assoc universe :terrain (g/put-cell (:terrain universe) coord val)))
@@ -87,3 +91,36 @@
 
 (defn remove-dead-enemies [universe]
   (update-in universe [:enemies] (partial u/remove-vals is-dead?)))
+
+
+(def angles {:up [225 315]
+             :down [45 135]
+             :left [315 45]
+             :right [135 225]})
+
+(defn calculate-fov [universe coord direction]
+  (let [start-angle (first (get angles direction))
+        end-angle (second (get angles direction))]
+    (los/getfov (partial blocks-vision? universe) coord start-angle end-angle)))
+
+(defn add-to-vismap [vismap coord visible-from-coord]
+  "records in vismap that coord is visible from visible-from-coord"
+  (assoc vismap coord (conj (get vismap coord) visible-from-coord)))
+
+(defn merge-to-vismap [vismap coord visible-set]
+  "records in vismap that the given set of coords visible-set is visible from coord"
+  (reduce #(add-to-vismap %1 %2 coord) vismap visible-set))
+
+(defn calculate-enemy-visible-set [universe enemy]
+  (calculate-fov universe (:position enemy) (:facing enemy)))
+
+(defn calculate-new-vismap [universe]
+  (reduce #(merge-to-vismap %1 %2 (calculate-enemy-visible-set universe %2))
+          {}
+          (vals (:enemies universe))))
+
+(defn update-enemy-vision [universe]
+  (assoc universe :vismap (calculate-new-vismap universe)))
+
+(defn visible-by-any? [universe coord]
+  (boolean (seq (get (:vismap universe) coord))))

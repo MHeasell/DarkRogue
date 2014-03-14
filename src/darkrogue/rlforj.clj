@@ -12,13 +12,13 @@
   (binding [visible-set #{}]
     (let [board (proxy [ILosBoard] []
                   (visit [x y] (set! visible-set (conj visible-set (c/make-coord x y))))
-                  (isObstacle [x y] (blocking-pred (c/make-coord x y)))
-                  (contains [x y] true))]
+                  (isObstacle [x y] (boolean (blocking-pred (c/make-coord x y))))
+                  (contains [x y] (c/in-rect? (c/make-coord x y) 0 0 500 500)))]
       (.visitConeFieldOfView (ShadowCasting.)
         board
         (:x start-coord)
         (:y start-coord)
-        500 
+        10
         startangle
         finishangle)
       visible-set)))
