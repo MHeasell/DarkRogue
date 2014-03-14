@@ -1,6 +1,5 @@
 (ns darkrogue.rlforj
-  (:require [darkrogue.coord :as c]
-            [darkrogue.universe :as u]))
+  (:require [darkrogue.coord :as c]))
 
 (import rlforj.los.ILosBoard)
 (import rlforj.los.IConeFovAlgorithm)
