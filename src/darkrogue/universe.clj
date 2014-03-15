@@ -160,3 +160,35 @@
 
 (defn player-visible-by? [universe fromcoord]
   (visible-by? universe (get-in universe [:player :position]) fromcoord))
+
+(defn can-see-player? [universe enemy]
+  (player-visible-by? universe (:position enemy)))
+
+; AI logic
+
+(def ai-actions
+  {:wait (fn [universe enemy] universe)})
+
+(defn ai-action-func [enemy action]
+  #((get ai-actions action) % enemy))
+
+(defn become-alerted [enemy]
+  (assoc enemy :state :alerted))
+
+(defn become-passive [enemy]
+  (assoc enemy :state :passive))
+
+(defn observe [universe enemy]
+  "produces a new enemy state based on the observed universe"
+  (if (can-see-player? universe enemy)
+    (become-alerted enemy)
+    (become-passive enemy)))
+
+(defn decide-action [universe enemy]
+  "returns an action for the enemy to take"
+  :wait)
+
+(defn process-ai-move [universe enemy]
+  (-> universe
+    (update-in [:enemies (:position enemy)] #(observe universe %))
+    ((ai-action-func enemy (decide-action universe enemy)))))

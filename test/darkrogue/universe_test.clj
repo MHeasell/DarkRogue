@@ -118,4 +118,14 @@
                    (make-universe)
                    (blocks-vision? (make-coord 1 1)))))))
 
+(deftest test-can-see-player
+  (testing "tests that can-see-player updates correctly"
+           (let [uni (-> (make-grid 3 3 :floor)
+                                (make-universe)
+                                (spawn-player (make-coord 1 1))
+                                (spawn-enemy (make-coord 1 2) :up)
+                                (update-enemy-vision))]
+             (is (true?
+                   (can-see-player? uni (get-enemy-at uni (make-coord 1 2))))))))
+
 (run-tests)

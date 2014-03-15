@@ -139,6 +139,11 @@
     (remove-dead-enemies)
     (update-enemy-vision)))
 
+(defn apply-ai-moves [universe]
+  (reduce #(tick-universe (process-ai-move %1 %2))
+          universe
+          (vals (:enemies universe))))
+
 (defn game-win [screen universe]
   (s/put-string screen 20 10 (apply str (repeat 25 \space)))
   (s/put-string screen 20 11 (apply str (repeat 25 \space)))
@@ -157,7 +162,7 @@
       (when new-universe
       (if (is-game-won? new-universe)
         (game-win screen universe)
-        (recur screen (tick-universe new-universe))))))
+        (recur screen (apply-ai-moves (tick-universe new-universe)))))))
 
 (defn random-point-in-universe [universe]
   (make-coord (rand-int (universe-width universe))
