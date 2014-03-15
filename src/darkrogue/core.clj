@@ -78,11 +78,15 @@
 (defn draw-enemies [screen universe offset]
   (dorun (map #(draw-enemy screen % offset) (vals (:enemies universe)))))
 
+(defn draw-messages [screen messages]
+  (dorun (map-indexed #(s/put-string screen 0 %1 %2) messages)))
+
 (defn draw-universe [screen universe]
   (let [camera-offset (make-coord 0 0)]
     (draw-level screen universe camera-offset)
     (draw-enemies screen universe camera-offset)
-    (draw-player screen (:player universe) camera-offset)))
+    (draw-player screen (:player universe) camera-offset)
+    (draw-messages screen (:messages universe))))
 
 ; player commands
 
@@ -149,7 +153,7 @@
 (defn game-loop [screen universe]
     (draw-universe screen universe)
     (s/redraw screen)
-    (let [new-universe (apply-input universe (s/get-key-blocking screen))]
+    (let [new-universe (apply-input (clear-messages universe) (s/get-key-blocking screen))]
       (when new-universe
       (if (is-game-won? new-universe)
         (game-win screen universe)
@@ -176,7 +180,8 @@
     (spawn-random spawn-enemy)
     (spawn-random spawn-enemy)
     (spawn-random spawn-big-bad)
-    ))
+    (tick-universe)
+    (add-message "You awaken...")))
 
 (defn start-game [screen]
   (game-loop screen (init-universe)))

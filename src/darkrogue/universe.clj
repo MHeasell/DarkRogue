@@ -21,10 +21,16 @@
 ; terrain is a grid of cells
 ; enemies is a map of coord -> enemy data
 ; vismap is a map of coord -> set of occupied coords that can see this
-(defrecord Universe [player terrain enemies vismap])
+(defrecord Universe [player terrain enemies vismap messages])
+
+(defn add-message [universe msg]
+  (assoc universe :messages (conj (:messages universe) msg)))
+
+(defn clear-messages [universe]
+  (assoc universe :messages []))
 
 (defn make-universe [terrain]
-  (Universe. nil terrain {} {}))
+  (Universe. nil terrain {} {} []))
 
 (defn make-enemy [position health direction]
   (Enemy. position health :guard direction))
@@ -80,7 +86,9 @@
 (defn hit-enemy [universe coord]
   (let [enemy (get-enemy-at universe coord)]
     (when enemy
-      (assoc-in universe [:enemies coord] (damage-enemy enemy 100)))))
+      (-> universe
+        (assoc-in [:enemies coord] (damage-enemy enemy 100))
+        (add-message "You stealthily extinguish your enemy's life.")))))
 
 (defn hit-enemy-offset [universe offset]
   (hit-enemy universe (c/add-coord (get-in universe [:player :position]) offset)))
