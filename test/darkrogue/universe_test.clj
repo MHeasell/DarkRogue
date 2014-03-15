@@ -57,7 +57,13 @@
                  (->
                    (make-grid 3 3 :empty)
                    (make-universe)
-                   (point-occupied? (make-coord 2 2)))))))
+                   (point-occupied? (make-coord 2 2)))))
+           (is (true?
+                 (->
+                   (make-grid 3 3 :empty)
+                   (make-universe)
+                   (spawn-player (make-coord 1 1))
+                   (point-occupied? (make-coord 1 1)))))))
 
 (deftest test-get-enemy
   (testing "tests enemy retrieval"

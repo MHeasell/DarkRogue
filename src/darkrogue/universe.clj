@@ -72,7 +72,9 @@
 
 (defn point-occupied? [universe coord]
   (or (is-obstacle? (:terrain universe) coord)
-      (contains? (:enemies universe) coord)))
+      (contains? (:enemies universe) coord)
+      (and (contains? universe :player)
+           (= (get-in universe [:player :position]) coord))))
 
 (defn blocks-vision? [universe coord] (is-obstacle? (:terrain universe) coord))
 
