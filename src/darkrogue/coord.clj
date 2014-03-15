@@ -55,3 +55,11 @@
         vert-coords (map #(make-coord x2 %) (range miny (+ maxy 1)))
         all-coords (concat horiz-coords vert-coords)]
     all-coords))
+
+(defn length [c]
+  (Math/sqrt (+
+              (* (:x c) (:x c))
+              (* (:y c) (:y c)))))
+
+(defn distance [a b]
+  (length (sub-coord b a)))

@@ -33,4 +33,10 @@
            (is (false?
                  (in-rect? (make-coord 3 3) 0 0 3 3)))))
 
+
+(deftest test-distance
+  (testing "checks distance func"
+           (is (= 5.0
+                  (distance (make-coord 1 1) (make-coord 4 5))))))
+
 (run-tests)
