@@ -50,9 +50,11 @@
 (defn spawn-player [universe position]
   (assoc universe :player (Player. position PLAYER_HP)))
 
-(defn spawn-enemy [universe position]
-  (assoc-in universe [:enemies position]
-            (make-enemy position ENEMY_HP (random-direction))))
+(defn spawn-enemy
+  ([universe position direction]
+    (assoc-in universe [:enemies position]
+              (make-enemy position ENEMY_HP direction)))
+  ([universe position] (spawn-enemy universe position (random-direction))))
 
 (defn spawn-big-bad [universe position]
   (assoc-in universe [:enemies position]
