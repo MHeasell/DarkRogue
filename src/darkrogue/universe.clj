@@ -3,7 +3,8 @@
   (:require [darkrogue.coord :as c])
   (:require [darkrogue.grid :as g])
   (:require [darkrogue.rlforj :as los])
-  (:require [darkrogue.vismap :as vis]))
+  (:require [darkrogue.vismap :as vis])
+  (:require [clojure.set :as s]))
 
 
 (def PLAYER_HP 100)
@@ -88,6 +89,14 @@
       (assoc-in universe [:player :position] newpos)
       universe)))
 
+(defn move-enemy [universe enemy offset direction]
+  (let [newpos (c/add-coord (:position enemy) offset)]
+    (if (not (point-occupied? universe newpos))
+      (update-in universe [:enemies] #(-> %
+                                        (dissoc (:position enemy))
+                                        (assoc newpos (assoc enemy :position newpos :facing direction))))
+      universe)))
+
 (defn get-enemy-at [universe coord]
   (get-in universe [:enemies coord]))
 
@@ -169,7 +178,11 @@
 ; AI logic
 
 (def ai-actions
-  {:wait (fn [universe enemy] universe)})
+  {:wait (fn [universe enemy] universe)
+   :up (fn [universe enemy] (move-enemy universe enemy c/unit-up :up))
+   :down (fn [universe enemy] (move-enemy universe enemy c/unit-down :down))
+   :left (fn [universe enemy] (move-enemy universe enemy c/unit-left :left))
+   :right (fn [universe enemy] (move-enemy universe enemy c/unit-right :right))})
 
 (defn ai-action-func [enemy action]
   #((get ai-actions action) % enemy))
@@ -184,11 +197,38 @@
   "produces a new enemy state based on the observed universe"
   (if (can-see-player? universe enemy)
     (become-alerted enemy)
-    (become-passive enemy)))
+    enemy))
+
+(def direction-coord-map {:left c/unit-left
+                          :right c/unit-right
+                          :up c/unit-up
+                          :down c/unit-down
+                          :wait c/zero})
+
+(defn apply-movement [coord direction]
+  (c/add-coord coord (get direction-coord-map direction)))
+
+(defn score-move [start dest move]
+  (c/distance (apply-movement start move) dest))
+
+(defn get-best-direction [start goal]
+  (min-key #(score-move start goal %)
+           :up
+           :down
+           :left
+           :right))
+
+(defn decide-action-alerted [universe enemy]
+  "decides AI action when in alerted state"
+  (let [target (get-in universe [:player :position])
+        action (get-best-direction (:position enemy) target)]
+    action))
 
 (defn decide-action [universe enemy]
   "returns an action for the enemy to take"
-  :wait)
+  (if (alerted? enemy)
+    (decide-action-alerted universe enemy)
+    :wait))
 
 (defn process-ai-move [universe enemy]
   (-> universe

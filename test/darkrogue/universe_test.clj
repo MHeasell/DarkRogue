@@ -134,4 +134,16 @@
              (is (true?
                    (can-see-player? uni (get-enemy-at uni (make-coord 1 2))))))))
 
+(deftest test-move-enemy
+  (testing "tests that enemy can be moved"
+           (let [uni (-> (make-grid 3 3 :floor)
+                       (make-universe)
+                       (spawn-enemy (make-coord 1 1) :up))
+                 enemy (get-enemy-at uni (make-coord 1 1))]
+             (is (= (make-coord 1 0)
+                    (-> uni
+                      (move-enemy enemy unit-up :up)
+                      (get-enemy-at (make-coord 1 0))
+                      (:position)))))))
+
 (run-tests)
