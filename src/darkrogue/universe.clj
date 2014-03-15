@@ -119,6 +119,8 @@
   (update-in universe [:enemies] (partial u/remove-vals is-dead?)))
 
 
+; visibility functions
+
 (def angles {:up [225 315]
              :down [45 135]
              :left [315 45]
@@ -150,3 +152,11 @@
 
 (defn visible-by-any? [universe coord]
   (boolean (seq (get (:vismap universe) coord))))
+
+(defn visible-by? [universe coord fromcoord]
+  "returns true if coord is visible from fromcoord"
+  (let [visible-set (get (:vismap universe) fromcoord)]
+    (contains? visible-set coord)))
+
+(defn player-visible-by? [universe fromcoord]
+  (visible-by? universe (get-in universe [:player :position]) fromcoord))
