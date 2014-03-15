@@ -13,7 +13,7 @@
 
 (defrecord Player [position health])
 
-(defrecord Enemy [position health type facing])
+(defrecord Enemy [position health type facing state])
 (def directions #{:up :down :left :right})
 (defn random-direction []
   (rand-nth (seq directions)))
@@ -33,10 +33,10 @@
   (Universe. nil terrain {} {} []))
 
 (defn make-enemy [position health direction]
-  (Enemy. position health :guard direction))
+  (Enemy. position health :guard direction :passive))
 
 (defn make-big-bad [position health direction]
-  (Enemy. position health :big-bad direction))
+  (Enemy. position health :big-bad direction :passive))
 
 (defn add-enemy [universe enemy]
   (assoc-in universe [:enemies (:position enemy)] enemy))
@@ -80,15 +80,28 @@
 (defn get-enemy-at [universe coord]
   (get-in universe [:enemies coord]))
 
+(defn alerted? [enemy]
+  (= :alerted (:state enemy)))
+
 (defn damage-enemy [enemy points]
   (assoc enemy :health (- (:health enemy) points)))
+
+(defn perform-stealth-kill [universe coord]
+  (-> universe
+    (update-in [:enemies coord] #(damage-enemy % 100))
+    (add-message "You stealthily extinguish your enemy's life.")))
+
+(defn perform-attack [universe coord]
+  (-> universe
+    (update-in [:enemies coord] #(damage-enemy % 40))
+    (add-message "You hit your enemy.")))
 
 (defn hit-enemy [universe coord]
   (let [enemy (get-enemy-at universe coord)]
     (when enemy
-      (-> universe
-        (assoc-in [:enemies coord] (damage-enemy enemy 100))
-        (add-message "You stealthily extinguish your enemy's life.")))))
+      (if (alerted? enemy)
+        (perform-attack universe coord)
+        (perform-stealth-kill universe coord)))))
 
 (defn hit-enemy-offset [universe offset]
   (hit-enemy universe (c/add-coord (get-in universe [:player :position]) offset)))
