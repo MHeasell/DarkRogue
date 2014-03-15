@@ -5,6 +5,12 @@
 (defn make-coord [x y]
   (Coordinate. x y))
 
+(def unit-left (make-coord -1 0))
+(def unit-right (make-coord 1 0))
+(def unit-up (make-coord 0 -1))
+(def unit-down (make-coord 0 1))
+(def zero (make-coord 0 0))
+
 (defn add-coord [a b]
   (make-coord
     (+ (:x a) (:x b))

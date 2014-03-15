@@ -90,11 +90,6 @@
 
 ; player commands
 
-(def unit-left (make-coord -1 0))
-(def unit-right (make-coord 1 0))
-(def unit-up (make-coord 0 -1))
-(def unit-down (make-coord 0 1))
-
 (defn context-action [universe offset]
   (let [new-coord (add-coord offset
                              (get-in universe [:player :position]))
