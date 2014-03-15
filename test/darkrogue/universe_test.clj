@@ -61,10 +61,10 @@
 
 (deftest test-get-enemy
   (testing "tests enemy retrieval"
-           (is (= (make-enemy (make-coord 1 1) 100)
+           (is (= (make-enemy (make-coord 1 1) 100 :up)
                  (-> (make-grid 3 3 :wall)
                    (make-universe)
-                   (spawn-enemy (make-coord 1 1))
+                   (spawn-enemy (make-coord 1 1) :up)
                    (get-enemy-at (make-coord 1 1)))))))
 
 (deftest test-hit-enemy
