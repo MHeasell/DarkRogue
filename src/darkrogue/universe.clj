@@ -134,8 +134,8 @@
 
 (def angles {:up [225 315]
              :down [45 135]
-             :left [315 45]
-             :right [135 225]})
+             :left [135 225]
+             :right [315 45]})
 
 (defn calculate-fov [universe coord direction]
   (let [start-angle (first (get angles direction))
