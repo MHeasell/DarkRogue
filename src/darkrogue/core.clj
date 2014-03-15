@@ -1,12 +1,12 @@
-(ns darkrogue.core)
+(ns darkrogue.core
+  (:require [lanterna.screen :as s])
+  (:use darkrogue.util)
+  (:use darkrogue.graph)
+  (:use darkrogue.coord)
+  (:use darkrogue.grid)
+  (:use darkrogue.worldgen)
+  (:use darkrogue.universe))
 
-(require '[lanterna.screen :as s])
-(use 'darkrogue.util)
-(use 'darkrogue.graph)
-(use 'darkrogue.coord)
-(use 'darkrogue.grid)
-(use 'darkrogue.worldgen)
-(use 'darkrogue.universe)
 
 ; level drawing stuff
 
