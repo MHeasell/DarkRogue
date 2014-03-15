@@ -32,11 +32,17 @@
 (defn make-universe [terrain]
   (Universe. nil terrain {} {} []))
 
-(defn make-enemy [position health direction]
-  (Enemy. position health :guard direction :passive))
+(defn make-enemy
+  ([position health direction]
+    (Enemy. position health :guard direction :passive))
+  ([position health]
+    (make-enemy position health :up)))
 
-(defn make-big-bad [position health direction]
-  (Enemy. position health :big-bad direction :passive))
+(defn make-big-bad
+  ([position health direction]
+    (Enemy. position health :big-bad direction :passive))
+  ([position health]
+    (make-big-bad position health :up)))
 
 (defn add-enemy [universe enemy]
   (assoc-in universe [:enemies (:position enemy)] enemy))
