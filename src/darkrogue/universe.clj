@@ -2,7 +2,8 @@
   (:require [darkrogue.util :as u])
   (:require [darkrogue.coord :as c])
   (:require [darkrogue.grid :as g])
-  (:require [darkrogue.rlforj :as los]))
+  (:require [darkrogue.rlforj :as los])
+  (:require [darkrogue.vismap :as vis]))
 
 
 (def PLAYER_HP 100)
@@ -139,19 +140,11 @@
         end-angle (second (get angles direction))]
     (los/getfov (partial blocks-vision? universe) coord start-angle end-angle)))
 
-(defn add-to-vismap [vismap coord visible-from-coord]
-  "records in vismap that coord is visible from visible-from-coord"
-  (assoc vismap coord (conj (get vismap coord) visible-from-coord)))
-
-(defn merge-to-vismap [vismap coord visible-set]
-  "records in vismap that the given set of coords visible-set is visible from coord"
-  (reduce #(add-to-vismap %1 %2 coord) vismap visible-set))
-
 (defn calculate-enemy-visible-set [universe enemy]
   (calculate-fov universe (:position enemy) (:facing enemy)))
 
 (defn calculate-new-vismap [universe]
-  (reduce #(merge-to-vismap %1 %2 (calculate-enemy-visible-set universe %2))
+  (reduce #(vis/mark-targets-visible %1 (:position %2) (calculate-enemy-visible-set universe %2))
           {}
           (vals (:enemies universe))))
 
@@ -159,12 +152,11 @@
   (assoc universe :vismap (calculate-new-vismap universe)))
 
 (defn visible-by-any? [universe coord]
-  (boolean (seq (get (:vismap universe) coord))))
+  (vis/visible-from-any? (:vismap universe) coord))
 
 (defn visible-by? [universe coord fromcoord]
   "returns true if coord is visible from fromcoord"
-  (let [visible-set (get (:vismap universe) fromcoord)]
-    (contains? visible-set coord)))
+  (vis/visible-from? (:vismap universe) coord fromcoord))
 
 (defn player-visible-by? [universe fromcoord]
   (visible-by? universe (get-in universe [:player :position]) fromcoord))
