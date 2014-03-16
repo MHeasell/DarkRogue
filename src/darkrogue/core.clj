@@ -249,7 +249,6 @@
     (spawn-random spawn-enemy)
     (spawn-random spawn-enemy)
     (spawn-random spawn-big-bad)
-    (throw-smoke (make-coord 5 5))
     (tick-universe)
     (add-message "You awaken...")))
 
