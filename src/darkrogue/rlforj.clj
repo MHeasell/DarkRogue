@@ -22,3 +22,16 @@
         startangle
         finishangle)
       visible-set)))
+
+(defn get-wide-fov [blocking-pred start-coord radius]
+  (binding [visible-set #{}]
+    (let [board (proxy [ILosBoard] []
+                  (visit [x y] (set! visible-set (conj visible-set (c/make-coord x y))))
+                  (isObstacle [x y] (boolean (blocking-pred (c/make-coord x y))))
+                  (contains [x y] (c/in-rect? (c/make-coord x y) 0 0 500 500)))]
+      (.visitFieldOfView (ShadowCasting.)
+        board
+        (:x start-coord)
+        (:y start-coord)
+        radius)
+      visible-set)))
