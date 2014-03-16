@@ -87,6 +87,7 @@
 
 (defn draw-universe [screen universe]
   (let [camera-offset (make-coord 0 0)]
+    (s/move-cursor screen 0 0)
     (draw-level screen universe camera-offset)
     (draw-enemies screen universe camera-offset)
     (draw-player screen (:player universe) camera-offset)
