@@ -1,5 +1,8 @@
 (ns darkrogue.util)
 
+(defn abs [x]
+  (if (neg? x) (- x) x))
+
 (defn fmap [f m]
   "applies the function f to all the values of the map m"
   (into {} (for [[k v] m] [k (f v)])))

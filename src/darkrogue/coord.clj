@@ -1,4 +1,5 @@
-(ns darkrogue.coord)
+(ns darkrogue.coord
+  (:use [darkrogue.util]))
 
 (defrecord Coordinate [x y]
   java.lang.Comparable
@@ -59,6 +60,15 @@
     (make-coord
       (+ (:x coord) dx)
       (+ (:y coord) dy))))
+
+(defn coords-in-radius [radius]
+  (for [x (range (- radius) (inc radius))
+        y (range (- radius) (inc radius))
+        :when (<= (+ (abs x) (abs y)) radius)]
+    (make-coord x y)))
+
+(defn coords-around [coord radius]
+  (map (partial add-coord coord) (coords-in-radius radius)))
 
 (defn get-line-coords [x1 y1 x2 y2]
   (let [minx (min x1 x2)
