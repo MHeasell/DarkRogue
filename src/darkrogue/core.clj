@@ -224,8 +224,8 @@
     (let [new-universe (apply-input screen (clear-messages universe) (s/get-key-blocking screen))]
       (when new-universe
         (cond
-          (is-game-won? new-universe) (game-win screen universe)
-          (is-game-lost? new-universe) (game-lose screen universe)
+          (is-game-won? new-universe) (game-win screen new-universe)
+          (is-game-lost? new-universe) (game-lose screen new-universe)
           :else (recur screen (update-enemy-vision (update-smoke (apply-ai-moves (tick-universe new-universe)))))))))
 
 (defn random-point-in-universe [universe]
