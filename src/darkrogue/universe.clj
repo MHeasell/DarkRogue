@@ -259,7 +259,6 @@
       (become-alerted)
       (reset-counter))
     (let [newen (inc-sighting-counter enemy)]
-      (println "turns since saw player: " (:turns-since-sighting newen))
       (if (and (alerted? newen)
                (> (:turns-since-sighting newen) AI_COOLOFF_TURNS))
         (do (println "enemy loses player") (become-passive newen))
