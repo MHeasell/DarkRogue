@@ -92,6 +92,24 @@
 
 ; player commands
 
+(defn ask-for-coord [initial screen message]
+  (s/put-string screen 0 0 message)
+  (s/move-cursor screen (:x initial) (:y initial))
+  (s/redraw screen)
+  (let [input (case (s/get-key-blocking screen)
+                \w :up
+                \a :left
+                \d :right
+                \s :down
+                :escape :exit
+                :enter :confirm)]
+    (case input
+      :exit nil
+      :confirm initial
+      (recur (apply-movement initial input)
+             screen
+             message))))
+
 (defn context-action [universe offset]
   (let [new-coord (add-coord offset
                              (get-in universe [:player :position]))
