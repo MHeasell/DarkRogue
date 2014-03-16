@@ -4,7 +4,8 @@
   (:require [darkrogue.grid :as g])
   (:require [darkrogue.rlforj :as los])
   (:require [darkrogue.vismap :as vis])
-  (:require [clojure.set :as s]))
+  (:require [clojure.set :as s])
+  (:require [darkrogue.pathfinding :as path]))
 
 
 (def PLAYER_HP 100)
@@ -222,12 +223,36 @@
            :left
            :right))
 
+(defn successors [terrain coord]
+  (into {} (map #(vector % 1)
+                (remove (partial is-obstacle? terrain)
+                        (c/neighbours coord)))))
+
+(defn get-path [terrain start goal]
+  (path/astar
+    (partial c/distance goal)
+    (partial successors terrain)
+    start
+    (partial = goal)))
+
+(defn which-direction [coord other]
+  (first
+    (filter #(= other (c/apply-movement coord %))
+            [:up :down :left :right])))
+
+(defn get-best-direction-2 [terrain start goal]
+  (let [path (get-path terrain start goal)
+        step (second path)]
+    (if (nil? step)
+      :wait
+      (which-direction start step))))
+
 (defn decide-action-alerted [universe enemy]
   "decides AI action when in alerted state"
   (if (player-next-to? universe enemy)
     :attack
     (let [target (get-in universe [:player :position])
-          action (get-best-direction (:position enemy) target)]
+          action (get-best-direction-2 (:terrain universe) (:position enemy) target)]
       action)))
 
 (defn decide-action [universe enemy]
