@@ -184,6 +184,9 @@
              :left [135 225]
              :right [315 45]})
 
+(defn calculate-wide-fov [universe coord radius]
+  (los/get-wide-fov (partial blocks-vision? universe) coord radius))
+
 (defn calculate-fov [universe coord direction]
   (let [start-angle (first (get angles direction))
         end-angle (second (get angles direction))]

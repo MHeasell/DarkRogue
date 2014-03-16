@@ -8,6 +8,8 @@
   (:use darkrogue.universe))
 
 
+(def SMOKE_BOMB_RANGE 10)
+
 ; level drawing stuff
 
 (defn get-glyph [sym]
@@ -112,6 +114,32 @@
                                       message)
       (recur initial screen message))))
 
+(defn ask-for-coord-limited [initial screen message valid-coords]
+  (s/put-string screen 0 0 message)
+  (s/move-cursor screen (:x initial) (:y initial))
+  (s/redraw screen)
+  (let [input (case (s/get-key-blocking screen)
+                (\w :up) :up
+                (\a :left) :left
+                (\d :right) :right
+                (\s :down) :down
+                :escape :exit
+                :enter :confirm
+                nil)]
+    (case input
+      :exit (do
+              (s/put-string screen 0 0 (apply str (repeat 50 \space)))
+              (s/put-string screen 0 0 "Never mind.")
+              (s/move-cursor screen 0 0)
+              (s/redraw screen))
+      :confirm initial
+      (:left :right :up :down) (let [newcoord (apply-movement initial input)]
+                                 (recur (if (contains? valid-coords newcoord) newcoord initial)
+                                        screen
+                                        message
+                                        valid-coords))
+      (recur initial screen message valid-coords))))
+
 (defn context-action [universe offset]
   (let [new-coord (add-coord offset
                              (get-in universe [:player :position]))
@@ -147,14 +175,16 @@
 
 (defn apply-input [screen universe input]
   (if (= \b input)
-    (let [coord (ask-for-coord (get-in universe [:player :position]) screen "Throw smoke bomb where?")]
+    (let [player-pos (get-in universe [:player :position])
+          valid-coords (calculate-wide-fov universe player-pos SMOKE_BOMB_RANGE)
+          coord (ask-for-coord-limited player-pos screen "Throw smoke bomb where?" valid-coords)]
       (if coord
         (throw-smoke-bomb universe coord)
-        (recur screen universe (s/get-key-blocking screen))))
+          (recur screen universe (s/get-key-blocking screen))))
     (let [f (get input-command-mapping input)]
       (if f
         (f universe)
-        universe))))
+        (recur screen universe (s/get-key-blocking screen))))))
 
 (defn tick-universe [universe]
   (-> universe
