@@ -18,7 +18,9 @@
 
 (def SMOKE_DURATION 5)
 
-(defrecord Player [position health])
+(def SMOKE_BOMB_COUNT 3)
+
+(defrecord Player [position health inventory])
 
 (defrecord Enemy [position health type facing state])
 (def directions #{:up :down :left :right})
@@ -38,6 +40,15 @@
   (let [coords (c/coords-around coord SMOKE_RADIUS)
         smoke-map (zipmap coords (repeat SMOKE_DURATION))]
     (update-in universe [:smoke] #(merge-with + % smoke-map))))
+
+(defn can-throw-smoke? [player]
+  (pos? (get-in player [:inventory :smoke-bomb])))
+
+(defn throw-smoke-bomb [universe coord]
+  (-> universe
+    (throw-smoke coord)
+    (update-in [:player :inventory :smoke-bomb] dec)
+    (add-message "You throw a smoke bomb. Thick smoke envelops the area.")))
 
 (defn fade-smoke [smokemap]
   (into {} (filter #(pos? (val %)) (u/fmap dec smokemap))))
@@ -70,7 +81,8 @@
   (assoc-in universe [:enemies (:position enemy)] enemy))
 
 (defn spawn-player [universe position]
-  (assoc universe :player (Player. position PLAYER_HP)))
+  (assoc universe :player (Player. position PLAYER_HP
+                                   {:smoke-bomb SMOKE_BOMB_COUNT})))
 
 (defn spawn-enemy
   ([universe position direction]

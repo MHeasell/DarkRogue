@@ -112,6 +112,9 @@
 (defn go-down [universe]
   (context-action universe unit-down))
 
+(defn bomb [universe]
+  (throw-smoke-bomb universe (get-in universe [:player :position])))
+
 ; main game initialization
 
 (def input-command-mapping
@@ -123,6 +126,7 @@
    \a go-left
    \s go-down
    \d go-right
+   \b bomb
    \x (fn [u] nil)})
 
 (defn apply-input [universe input]
@@ -194,6 +198,7 @@
     (spawn-random spawn-enemy)
     (spawn-random spawn-enemy)
     (spawn-random spawn-big-bad)
+    (throw-smoke (make-coord 5 5))
     (tick-universe)
     (add-message "You awaken...")))
 
