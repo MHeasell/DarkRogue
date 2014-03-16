@@ -5,7 +5,8 @@
   (:use darkrogue.coord)
   (:use darkrogue.grid)
   (:use darkrogue.worldgen)
-  (:use darkrogue.universe))
+  (:use darkrogue.universe)
+  (:gen-class))
 
 
 (def SMOKE_BOMB_RANGE 10)

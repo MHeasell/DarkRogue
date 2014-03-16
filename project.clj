@@ -9,4 +9,5 @@
                  [org.clojure/data.priority-map "0.0.4"]
                  [rlforj "0.3"]]
   :plugins [[lein-localrepo "0.5.3"]]
+  :aot [darkrogue.core]
   :main darkrogue.core)
