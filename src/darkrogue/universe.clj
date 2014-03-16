@@ -44,12 +44,6 @@
 (defn can-throw-smoke? [player]
   (pos? (get-in player [:inventory :smoke-bomb])))
 
-(defn throw-smoke-bomb [universe coord]
-  (-> universe
-    (throw-smoke coord)
-    (update-in [:player :inventory :smoke-bomb] dec)
-    (add-message "You throw a smoke bomb. Thick smoke envelops the area.")))
-
 (defn fade-smoke [smokemap]
   (into {} (filter #(pos? (val %)) (u/fmap dec smokemap))))
 
@@ -61,6 +55,12 @@
 
 (defn clear-messages [universe]
   (assoc universe :messages []))
+
+(defn throw-smoke-bomb [universe coord]
+  (-> universe
+    (throw-smoke coord)
+    (update-in [:player :inventory :smoke-bomb] dec)
+    (add-message "You throw a smoke bomb. Thick smoke envelops the area.")))
 
 (defn make-universe [terrain]
   (Universe. nil terrain {} {} [] {}))
