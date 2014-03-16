@@ -28,9 +28,11 @@
   (get-glyph (get-display-item (:terrain universe) coord)))
 
 (defn draw-level-tile [screen universe level-coord screen-coord]
-  (let [glyph-str (str (get-glyph-in-universe universe level-coord))
-        attrs (if (visible-by-any? universe level-coord) {:bg :white :fg :black} {})]
-    (s/put-string screen (:x screen-coord) (:y screen-coord) glyph-str attrs)))
+  (if (smoked? universe level-coord)
+    (s/put-string screen (:x screen-coord) (:y screen-coord) "S" {:fg :green})
+    (let [glyph-str (str (get-glyph-in-universe universe level-coord))
+          attrs (if (visible-by-any? universe level-coord) {:bg :white :fg :black} {})]
+      (s/put-string screen (:x screen-coord) (:y screen-coord) glyph-str attrs))))
 
 (defn draw-level [screen universe coords]
   (let [screen-size (s/get-size screen)

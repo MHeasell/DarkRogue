@@ -24,7 +24,16 @@
 ; terrain is a grid of cells
 ; enemies is a map of coord -> enemy data
 ; vismap is a map of coord -> set of occupied coords that can see this
-(defrecord Universe [player terrain enemies vismap messages])
+; smoke - a map of coords that are veiled in smoke -> how many turns left
+(defrecord Universe [player terrain enemies vismap messages smoke])
+
+(defn smoked? [universe coord]
+  (contains? (:smoke universe) coord))
+
+(defn throw-smoke [universe coord]
+  (let [coords (c/coords-around coord 3)
+        smoke-map (zipmap coords (repeat 3))]
+    (update-in universe [:smoke] #(merge-with + % smoke-map))))
 
 (defn add-message [universe msg]
   (assoc universe :messages (conj (:messages universe) msg)))
@@ -33,7 +42,7 @@
   (assoc universe :messages []))
 
 (defn make-universe [terrain]
-  (Universe. nil terrain {} {} []))
+  (Universe. nil terrain {} {} [] {}))
 
 (defn make-enemy
   ([position health direction]
@@ -78,7 +87,10 @@
       (and (contains? universe :player)
            (= (get-in universe [:player :position]) coord))))
 
-(defn blocks-vision? [universe coord] (is-obstacle? (:terrain universe) coord))
+(defn blocks-vision? [universe coord]
+  (or
+    (is-obstacle? (:terrain universe) coord)
+    (smoked? universe coord)))
 
 (defn put-tile [universe coord val]
   (assoc universe :terrain (g/put-cell (:terrain universe) coord val)))
