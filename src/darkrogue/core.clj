@@ -97,18 +97,20 @@
   (s/move-cursor screen (:x initial) (:y initial))
   (s/redraw screen)
   (let [input (case (s/get-key-blocking screen)
-                \w :up
-                \a :left
-                \d :right
-                \s :down
+                (\w :up) :up
+                (\a :left) :left
+                (\d :right) :right
+                (\s :down) :down
                 :escape :exit
-                :enter :confirm)]
+                :enter :confirm
+                nil)]
     (case input
       :exit nil
       :confirm initial
-      (recur (apply-movement initial input)
-             screen
-             message))))
+      (:left :right :up :down) (recur (apply-movement initial input)
+                                      screen
+                                      message)
+      (recur initial screen message))))
 
 (defn context-action [universe offset]
   (let [new-coord (add-coord offset
@@ -130,9 +132,6 @@
 (defn go-down [universe]
   (context-action universe unit-down))
 
-(defn bomb [universe]
-  (throw-smoke-bomb universe (get-in universe [:player :position])))
-
 ; main game initialization
 
 (def input-command-mapping
@@ -144,14 +143,18 @@
    \a go-left
    \s go-down
    \d go-right
-   \b bomb
    \x (fn [u] nil)})
 
-(defn apply-input [universe input]
-  (let [f (get input-command-mapping input)]
-    (if f
-      (f universe)
-      universe)))
+(defn apply-input [screen universe input]
+  (if (= \b input)
+    (let [coord (ask-for-coord (get-in universe [:player :position]) screen "Throw smoke bomb where?")]
+      (if coord
+        (throw-smoke-bomb universe coord)
+        (recur screen universe (s/get-key-blocking screen))))
+    (let [f (get input-command-mapping input)]
+      (if f
+        (f universe)
+        universe))))
 
 (defn tick-universe [universe]
   (-> universe
@@ -188,7 +191,7 @@
 (defn game-loop [screen universe]
     (draw-universe screen universe)
     (s/redraw screen)
-    (let [new-universe (apply-input (clear-messages universe) (s/get-key-blocking screen))]
+    (let [new-universe (apply-input screen (clear-messages universe) (s/get-key-blocking screen))]
       (when new-universe
         (cond
           (is-game-won? new-universe) (game-win screen universe)
