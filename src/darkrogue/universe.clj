@@ -135,6 +135,9 @@
 (defn is-game-won? [universe]
   (boolean (some (every-pred is-big-bad? is-dead?) (vals (:enemies universe)))))
 
+(defn is-game-lost? [universe]
+  (not (pos? (get-in universe [:player :health]))))
+
 (defn remove-dead-enemies [universe]
   (update-in universe [:enemies] (partial u/remove-vals is-dead?)))
 
@@ -175,6 +178,15 @@
 (defn can-see-player? [universe enemy]
   (player-visible-by? universe (:position enemy)))
 
+(defn player-next-to? [universe enemy]
+  (let [neighbours (set (c/neighbours (:position enemy)))]
+    (contains? neighbours (get-in universe [:player :position]))))
+
+(defn hit-player [universe]
+  (-> universe
+    (update-in [:player :health] #(- % 40))
+    (add-message "An enemy hits you!")))
+
 ; AI logic
 
 (def ai-actions
@@ -182,7 +194,8 @@
    :up (fn [universe enemy] (move-enemy universe enemy c/unit-up :up))
    :down (fn [universe enemy] (move-enemy universe enemy c/unit-down :down))
    :left (fn [universe enemy] (move-enemy universe enemy c/unit-left :left))
-   :right (fn [universe enemy] (move-enemy universe enemy c/unit-right :right))})
+   :right (fn [universe enemy] (move-enemy universe enemy c/unit-right :right))
+   :attack (fn [universe enemy] (hit-player universe))})
 
 (defn ai-action-func [enemy action]
   #((get ai-actions action) % enemy))
@@ -211,9 +224,11 @@
 
 (defn decide-action-alerted [universe enemy]
   "decides AI action when in alerted state"
-  (let [target (get-in universe [:player :position])
-        action (get-best-direction (:position enemy) target)]
-    action))
+  (if (player-next-to? universe enemy)
+    :attack
+    (let [target (get-in universe [:player :position])
+          action (get-best-direction (:position enemy) target)]
+      action)))
 
 (defn decide-action [universe enemy]
   "returns an action for the enemy to take"

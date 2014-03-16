@@ -150,14 +150,26 @@
       nil
       (recur (s/get-key-blocking screen)))))
 
+(defn game-lose [screen universe]
+  (s/put-string screen 20 10 (apply str (repeat 25 \space)))
+  (s/put-string screen 20 11 (apply str (repeat 25 \space)))
+  (s/put-string screen 20 12 (apply str (repeat 25 \space)))
+  (s/put-string screen 21 11 "Killed! You have failed.")
+  (s/redraw screen)
+  (loop [key (s/get-key-blocking screen)]
+    (if (= \x key)
+      nil
+      (recur (s/get-key-blocking screen)))))
+
 (defn game-loop [screen universe]
     (draw-universe screen universe)
     (s/redraw screen)
     (let [new-universe (apply-input (clear-messages universe) (s/get-key-blocking screen))]
       (when new-universe
-      (if (is-game-won? new-universe)
-        (game-win screen universe)
-        (recur screen (apply-ai-moves (tick-universe new-universe)))))))
+        (cond
+          (is-game-won? new-universe) (game-win screen universe)
+          (is-game-lost? new-universe) (game-lose screen universe)
+          :else (recur screen (apply-ai-moves (tick-universe new-universe)))))))
 
 (defn random-point-in-universe [universe]
   (make-coord (rand-int (universe-width universe))
