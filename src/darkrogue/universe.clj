@@ -314,6 +314,7 @@
     :wait))
 
 (defn process-ai-move [universe enemy]
-  (-> universe
-    (update-in [:enemies (:position enemy)] #(observe universe %))
-    ((ai-action-func enemy (decide-action universe enemy)))))
+  (let [new-enemy (observe universe enemy)
+        new-universe (assoc-in universe [:enemies (:position enemy)] new-enemy)
+        action-func (ai-action-func new-enemy (decide-action new-universe new-enemy))]
+    (action-func new-universe)))
