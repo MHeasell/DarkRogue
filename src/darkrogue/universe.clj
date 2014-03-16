@@ -199,17 +199,8 @@
     (become-alerted enemy)
     enemy))
 
-(def direction-coord-map {:left c/unit-left
-                          :right c/unit-right
-                          :up c/unit-up
-                          :down c/unit-down
-                          :wait c/zero})
-
-(defn apply-movement [coord direction]
-  (c/add-coord coord (get direction-coord-map direction)))
-
 (defn score-move [start dest move]
-  (c/distance (apply-movement start move) dest))
+  (c/distance (c/apply-movement start move) dest))
 
 (defn get-best-direction [start goal]
   (min-key #(score-move start goal %)

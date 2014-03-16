@@ -11,6 +11,12 @@
 (def unit-down (make-coord 0 1))
 (def zero (make-coord 0 0))
 
+(def direction-coord-map
+  {:left unit-left
+   :right unit-right
+   :up unit-up
+   :down unit-down})
+
 (defn add-coord [a b]
   (make-coord
     (+ (:x a) (:x b))
@@ -63,3 +69,6 @@
 
 (defn distance [a b]
   (length (sub-coord b a)))
+
+(defn apply-movement [coord direction]
+  (add-coord coord (get direction-coord-map direction)))
