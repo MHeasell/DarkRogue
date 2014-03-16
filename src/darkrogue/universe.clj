@@ -39,6 +39,12 @@
         smoke-map (zipmap coords (repeat SMOKE_DURATION))]
     (update-in universe [:smoke] #(merge-with + % smoke-map))))
 
+(defn fade-smoke [smokemap]
+  (into {} (filter #(pos? (val %)) (u/fmap dec smokemap))))
+
+(defn update-smoke [universe]
+  (update-in universe [:smoke] fade-smoke))
+
 (defn add-message [universe msg]
   (assoc universe :messages (conj (:messages universe) msg)))
 

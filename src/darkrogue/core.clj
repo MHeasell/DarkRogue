@@ -171,7 +171,7 @@
         (cond
           (is-game-won? new-universe) (game-win screen universe)
           (is-game-lost? new-universe) (game-lose screen universe)
-          :else (recur screen (apply-ai-moves (tick-universe new-universe)))))))
+          :else (recur screen (update-enemy-vision (update-smoke (apply-ai-moves (tick-universe new-universe)))))))))
 
 (defn random-point-in-universe [universe]
   (make-coord (rand-int (universe-width universe))
