@@ -16,11 +16,11 @@
 
 (def SMOKE_RADIUS 3)
 
-(def SMOKE_DURATION 5)
+(def SMOKE_DURATION 10)
 
 (def SMOKE_BOMB_COUNT 3)
 
-(def AI_COOLOFF_TURNS 1)
+(def AI_COOLOFF_TURNS 3)
 
 (defrecord Player [position health inventory])
 
