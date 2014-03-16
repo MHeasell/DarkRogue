@@ -1,6 +1,14 @@
 (ns darkrogue.coord)
 
-(defrecord Coordinate [x y])
+(defrecord Coordinate [x y]
+  java.lang.Comparable
+  (compareTo [this other]
+    (cond (< (:x this) (:x other)) -1
+          (> (:x this) (:x other)) 1
+          :else (cond
+                  (< (:y this) (:y other)) -1
+                  (> (:y this (:y other))) 1
+                  :else 0))))
 
 (defn make-coord [x y]
   (Coordinate. x y))
