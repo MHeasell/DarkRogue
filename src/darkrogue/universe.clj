@@ -14,6 +14,10 @@
 
 (def BIG_BAD_HP 100)
 
+(def SMOKE_RADIUS 3)
+
+(def SMOKE_DURATION 5)
+
 (defrecord Player [position health])
 
 (defrecord Enemy [position health type facing state])
@@ -31,8 +35,8 @@
   (contains? (:smoke universe) coord))
 
 (defn throw-smoke [universe coord]
-  (let [coords (c/coords-around coord 3)
-        smoke-map (zipmap coords (repeat 3))]
+  (let [coords (c/coords-around coord SMOKE_RADIUS)
+        smoke-map (zipmap coords (repeat SMOKE_DURATION))]
     (update-in universe [:smoke] #(merge-with + % smoke-map))))
 
 (defn add-message [universe msg]
