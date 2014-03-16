@@ -20,9 +20,11 @@
 
 (def SMOKE_BOMB_COUNT 3)
 
+(def AI_COOLOFF_TURNS 1)
+
 (defrecord Player [position health inventory])
 
-(defrecord Enemy [position health type facing state])
+(defrecord Enemy [position health type facing state turns-since-sighting])
 (def directions #{:up :down :left :right})
 (defn random-direction []
   (rand-nth (seq directions)))
@@ -67,13 +69,13 @@
 
 (defn make-enemy
   ([position health direction]
-    (Enemy. position health :guard direction :passive))
+    (Enemy. position health :guard direction :passive 100))
   ([position health]
     (make-enemy position health :up)))
 
 (defn make-big-bad
   ([position health direction]
-    (Enemy. position health :big-bad direction :passive))
+    (Enemy. position health :big-bad direction :passive 100))
   ([position health]
     (make-big-bad position health :up)))
 
@@ -241,14 +243,28 @@
 (defn become-alerted [enemy]
   (assoc enemy :state :alerted))
 
+(defn reset-counter [enemy]
+  (assoc enemy :turns-since-sighting 0))
+
+(defn inc-sighting-counter [enemy]
+  (update-in enemy [:turns-since-sighting] inc))
+
 (defn become-passive [enemy]
   (assoc enemy :state :passive))
 
 (defn observe [universe enemy]
   "produces a new enemy state based on the observed universe"
   (if (can-see-player? universe enemy)
-    (become-alerted enemy)
-    enemy))
+    ( -> enemy
+      (become-alerted)
+      (reset-counter))
+    (let [newen (inc-sighting-counter enemy)]
+      (println "turns since saw player: " (:turns-since-sighting newen))
+      (if (and (alerted? newen)
+               (> (:turns-since-sighting newen) AI_COOLOFF_TURNS))
+        (do (println "enemy loses player") (become-passive newen))
+        newen))))
+
 
 (defn score-move [start dest move]
   (c/distance (c/apply-movement start move) dest))
